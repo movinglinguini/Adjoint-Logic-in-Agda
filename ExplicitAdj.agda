@@ -73,7 +73,7 @@ module AgdaAdjointLogic.ExplicitAdj (U : Set) (_≥_ : Mode → Mode → Set) wh
 
   data _≥ˡ_ : ∀ (Ψ : List HProp) (k : Mode) → Set where
     P≥k : ∀ { m : Mode } { B : Prop m } { Ψ : List HProp } { k : Mode }
-      → (` B) ∈ Ψ → modeOf (B) ≥ k 
+      → (` B) ∈ Ψ → (modeOf (B)) ≥ k 
       ------------------------------
       → Ψ ≥ˡ k
 
