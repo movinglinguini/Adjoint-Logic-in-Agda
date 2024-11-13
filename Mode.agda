@@ -33,5 +33,8 @@ module AgdaAdjointLogic.Mode where
         → l ≥ m → m ≥ n
           -----------------
         → l ≥ n
-        
+
+  rulesOf : Mode → List StructRule
+  rulesOf (` L) = L
+
   
