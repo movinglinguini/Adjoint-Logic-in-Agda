@@ -5,9 +5,9 @@ open import Data.List.Membership.Propositional using (_∈_)
 open import Relation.Nullary using (¬_; Dec; yes; no)
 open import Data.Bool using (Bool; false; true)
 
-open import AgdaAdjointLogic.Mode using (StructRule; _∈ᴹ_; Mode; rulesOf)
+open import Mode using (StructRule; _∈ᴹ_; Mode; rulesOf)
 
-module AgdaAdjointLogic.ExplicitAdj (U : Set) (_≥_ : Mode → Mode → Set) where
+module ExplicitAdj (U : Set) (_≥_ : Mode → Mode → Set) where
 
   infix 10 _⊗_
   infix 10 _⊕_
@@ -97,5 +97,17 @@ module AgdaAdjointLogic.ExplicitAdj (U : Set) (_≥_ : Mode → Mode → Set) wh
         -----------------------------------------------------
         → (` Aₘ , Ψ) ⊢ Cₖ
     
-  
-         
+    ⊕R₁ : ∀ { m : Mode } { Ψ : List HProp } { Aₘ : Prop m } { Bₘ : Prop m }
+        → Ψ ⊢ Aₘ
+        ---------------
+        → Ψ ⊢ Aₘ ⊕ Bₘ
+
+    ⊕R₂ : ∀ { m : Mode } { Ψ : List HProp } { Aₘ : Prop m } { Bₘ : Prop m }
+        → Ψ ⊢ Bₘ
+        ---------------
+        → Ψ ⊢ Aₘ ⊕ Bₘ
+    
+    ⊕L : ∀ { m k : Mode } { Ψ : List HProp } { Aₘ : Prop m } { Bₘ : Prop m } { Cₖ : Prop k }
+        → (` Aₘ , Ψ) ⊢ Cₖ   →   (` Bₘ , Ψ ) ⊢ Cₖ
+        -----------------------------------------
+        → (` (Aₘ ⊕ Bₘ) , Ψ) ⊢ Cₖ 

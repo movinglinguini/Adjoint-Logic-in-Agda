@@ -1,7 +1,7 @@
 open import Data.List using (List; _++_; any) renaming (_∷_ to _,_; _∷ʳ_ to _,′_; [] to ∅)
 open import Relation.Binary.PropositionalEquality using (_≡_)
 
-module AgdaAdjointLogic.Mode where
+module Mode where
 
   data StructRule : Set where
     W : StructRule
