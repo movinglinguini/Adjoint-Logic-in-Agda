@@ -71,22 +71,33 @@ module ExplicitAdj (U : Set) (_≥_ : Mode → Mode → Set) where
   
   infix 5 _⊢_
 
+  -- Definition for comparing a mode to all modes of a list of propositions
   data _≥ˡ_ : ∀ (Ψ : List HProp) (k : Mode) → Set where
+    ∅≥k : ∀ { k : Mode }
+      ---------------------
+      → ∅ ≥ˡ k
+
     P≥k : ∀ { m : Mode } { B : Prop m } { Ψ : List HProp } { k : Mode }
       → (` B) ∈ Ψ → (modeOf (B)) ≥ k 
       ------------------------------
       → Ψ ≥ˡ k
 
+  {-
+    Finally, the Logical Rules
+  -}
   data _⊢_ : ∀ {m : Mode} (Ψ : List HProp) → Prop m → Set where
+    -- Axiom
     id : ∀ {m : Mode} { A : Prop m }
         ------------------------------
         → (` A , ∅) ⊢ A
 
+    -- Cut
     cut : ∀ {m k l : Mode} { Ψ₁ Ψ₂ : List HProp } {Cₖ : Prop k} { Aₘ : Prop m }
         → Ψ₁ ≥ˡ m → m ≥ k     →   Ψ₁ ⊢ Aₘ   → (` Aₘ , Ψ₂) ⊢ Cₖ 
         -------------------------------------------------------
         → (Ψ₁ ++ Ψ₂) ⊢ Cₖ
 
+    -- Structural rules
     weaken : ∀ { m k : Mode } { Ψ : List HProp } { Cₖ : Prop k } { Aₘ : Prop m }
         → StructRule.W ∈ σ(` Aₘ , ∅)    →   Ψ ⊢ Cₖ
         ---------------------------------------------
@@ -97,6 +108,7 @@ module ExplicitAdj (U : Set) (_≥_ : Mode → Mode → Set) where
         -----------------------------------------------------
         → (` Aₘ , Ψ) ⊢ Cₖ
     
+    -- Oplus
     ⊕R₁ : ∀ { m : Mode } { Ψ : List HProp } { Aₘ : Prop m } { Bₘ : Prop m }
         → Ψ ⊢ Aₘ
         ---------------
@@ -111,3 +123,10 @@ module ExplicitAdj (U : Set) (_≥_ : Mode → Mode → Set) where
         → (` Aₘ , Ψ) ⊢ Cₖ   →   (` Bₘ , Ψ ) ⊢ Cₖ
         -----------------------------------------
         → (` (Aₘ ⊕ Bₘ) , Ψ) ⊢ Cₖ 
+
+    -- With
+    -- Tensor
+    -- Lolli
+    -- Multiplicative unit
+    -- Down shift
+    -- Up shift
