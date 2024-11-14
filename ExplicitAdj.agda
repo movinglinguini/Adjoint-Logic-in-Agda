@@ -86,18 +86,18 @@ module ExplicitAdj (U : Set) (_≥_ : Mode → Mode → Set) where
     Finally, the Logical Rules
   -}
   data _⊢_ : ∀ {m : Mode} (Ψ : List HProp) → Prop m → Set where
-    -- Axiom
+    {- Axiom -}
     id : ∀ {m : Mode} { A : Prop m }
         ------------------------------
         → (` A , ∅) ⊢ A
 
-    -- Cut
+    {- Cut -}
     cut : ∀ {m k l : Mode} { Ψ₁ Ψ₂ : List HProp } {Cₖ : Prop k} { Aₘ : Prop m }
         → Ψ₁ ≥ˡ m → m ≥ k     →   Ψ₁ ⊢ Aₘ   → (` Aₘ , Ψ₂) ⊢ Cₖ 
         -------------------------------------------------------
         → (Ψ₁ ++ Ψ₂) ⊢ Cₖ
 
-    -- Structural rules
+    {- Structural Rules -}
     weaken : ∀ { m k : Mode } { Ψ : List HProp } { Cₖ : Prop k } { Aₘ : Prop m }
         → StructRule.W ∈ σ(` Aₘ , ∅)    →   Ψ ⊢ Cₖ
         ---------------------------------------------
@@ -105,8 +105,17 @@ module ExplicitAdj (U : Set) (_≥_ : Mode → Mode → Set) where
 
     contract : ∀ { m k : Mode } { Ψ : List HProp } { Cₖ : Prop k } { Aₘ : Prop m }
         → StructRule.C ∈ σ(` Aₘ , ∅)  → ((` Aₘ) , (` Aₘ) , Ψ) ⊢ Cₖ
-        -----------------------------------------------------
+        -----------------------------------------------------------
         → (` Aₘ , Ψ) ⊢ Cₖ
+
+    -- Exchange isn't included in the ADJ paper, and instead is left as implicitly admitted.
+    -- Writing it in the style of Abramsky's Computational interpretations of linear logic, where we are
+    -- exchanging propositions. This is in contrast to Wen Kokke's model of intuitionistic logic, where
+    -- she exchanges whole pieces of context.
+    exchange : ∀ { m k l : Mode } { Ψ₁ Ψ₂ : List HProp } { Aₘ : Prop m } { Bₗ : Prop l } { Cₖ : Prop k }
+        → ((Ψ₁ ,′ (` Aₘ)) ++ ((` Bₗ) , Ψ₂)) ⊢ Cₖ
+        ------------------------------------
+        → ((Ψ₁ ,′ (` Bₗ)) ++ ((` Aₘ) , Ψ₂)) ⊢ Cₖ
     
     -- Oplus
     ⊕R₁ : ∀ { m : Mode } { Ψ : List HProp } { Aₘ : Prop m } { Bₘ : Prop m }
@@ -125,8 +134,43 @@ module ExplicitAdj (U : Set) (_≥_ : Mode → Mode → Set) where
         → (` (Aₘ ⊕ Bₘ) , Ψ) ⊢ Cₖ 
 
     -- With
+    &R : ∀ { m : Mode } { Ψ : List HProp } { Aₘ Bₘ : Prop m }
+        → Ψ ⊢ Aₘ    →   Ψ ⊢ Bₘ
+        ------------------------
+        → Ψ ⊢ Aₘ & Bₘ
+
+    &L₁ : ∀ { m k : Mode } { Ψ : List HProp } { Aₘ Bₘ : Prop m } { Cₖ : Prop k }
+        → (` Aₘ , Ψ) ⊢ Cₖ
+        --------------
+        → (` (Aₘ & Bₘ) , Ψ) ⊢ Cₖ
+
+    &L₂ : ∀ { m k : Mode } { Ψ : List HProp } { Aₘ Bₘ : Prop m } { Cₖ : Prop k }
+        → (` Bₘ , Ψ) ⊢ Cₖ
+        --------------
+        → (` (Aₘ & Bₘ) , Ψ) ⊢ Cₖ 
     -- Tensor
+    ⊗R : ∀ { m : Mode } { Ψ₁ Ψ₂ : List HProp } { Aₘ Bₘ : Prop m }
+        → Ψ₁ ⊢ Aₘ   →   Ψ₂ ⊢ Bₘ
+        -------------------------
+        → (Ψ₁ ++ Ψ₂) ⊢ Aₘ ⊗ Bₘ
+
+    ⊗L : ∀ { m k : Mode } { Ψ : List HProp } { Aₘ Bₘ : Prop m } { Cₖ : Prop k }
+        → (` Aₘ , ` Bₘ , Ψ) ⊢ Cₖ
+        --------------------------
+        → (` (Aₘ ⊗ Bₘ) , Ψ) ⊢ Cₖ
     -- Lolli
+    ⊸R : ∀ { m : Mode } { Ψ : List HProp } { Aₘ Bₘ : Prop m }
+        → (` Aₘ , Ψ) ⊢ Bₘ
+        --------------------
+        → Ψ ⊢ Aₘ ⊸ Bₘ
+
+    ⊸L : ∀ { m k : Mode } { Ψ₁ Ψ₂ : List HProp } { Aₘ Bₘ : Prop m } { Cₖ : Prop k }
+        → Ψ₁ ⊢ Aₘ   →   (` Bₘ , Ψ₂) ⊢ Cₖ
+        ----------------------------------
+        → (` (Aₘ ⊸ Bₘ) , (Ψ₁ ++ Ψ₂)) ⊢ Cₖ
     -- Multiplicative unit
     -- Down shift
     -- Up shift
+
+    
+ 
