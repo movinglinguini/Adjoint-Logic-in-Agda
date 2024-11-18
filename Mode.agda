@@ -1,5 +1,6 @@
 open import Data.List using (List; _++_; any) renaming (_∷_ to _,_; _∷ʳ_ to _,′_; [] to ∅)
-open import Relation.Binary.PropositionalEquality using (_≡_)
+open import Data.List.Relation.Binary.Sublist.Setoid using (_⊇_)
+open import Relation.Binary.Core using (Rel)
 
 module Mode where
 
@@ -7,34 +8,21 @@ module Mode where
     W : StructRule
     C : StructRule
 
-  infix 15 `_
-
-  data Mode : Set where
-    `_ : List StructRule → Mode
-  
-  infix 10 _∈ᴹ_
-  data _∈ᴹ_ : ∀ (S : StructRule) (M : Mode) → Set where 
-    id : ∀ { R S } 
-        -----------------
-        → R ∈ᴹ `( R , S )
-
-    search : ∀ { R Q S } 
-        → R ∈ᴹ  ` S
-        -------------
-        → R ∈ᴹ `(Q , S)
-
-
-  data _≥_ : ∀ (m k : Mode) → Set where
-    refl : ∀ { m }
-        --------------
-        → m ≥ m
-    
-    trans : ∀ { l m n }
-        → l ≥ m → m ≥ n
-          -----------------
-        → l ≥ n
+  record Mode : Set where
+    field
+      structRules : List StructRule
 
   rulesOf : Mode → List StructRule
-  rulesOf (` L) = L
+  rulesOf record { structRules = structRules } = structRules
 
-  
+  -- some example modes
+  Linear : Mode
+  Linear = record { structRules = ∅ }
+
+  Unrestricted : Mode
+  Unrestricted = record { structRules = StructRule.W , StructRule.C , ∅ }
+
+
+
+
+ 

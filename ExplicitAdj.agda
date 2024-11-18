@@ -5,14 +5,15 @@ open import Data.List.Membership.Propositional using (_∈_)
 open import Relation.Nullary using (¬_; Dec; yes; no)
 open import Data.Bool using (Bool; false; true)
 
-open import Mode using (StructRule; _∈ᴹ_; Mode; rulesOf)
+open import Mode using (StructRule; Mode; rulesOf)
 
 module ExplicitAdj (U : Set) (_≥_ : Mode → Mode → Set) where
 
   infix 10 _⊗_
   infix 10 _⊕_
   infix 10 _&_
-  infix 10 _⊸_ 
+  infix 10 _⊸_
+  infix 10 1[_]
 
   data Prop (m : Mode) : Set where
     -- An arbitrary proposition
@@ -22,15 +23,42 @@ module ExplicitAdj (U : Set) (_≥_ : Mode → Mode → Set) where
     -- Tensor
     _⊗_ : Prop m → Prop m → Prop m
     -- Unit
-    𝟙 : Prop m
+    1[_] : Mode → Prop m
     -- Plus - Using the binary relation rather than the n-ary version for simplicity
     _⊕_ : Prop m → Prop m → Prop m
     -- With - Using the binary version rather than the n-ary version for simplicity
     _&_ : Prop m → Prop m → Prop m
-    -- Up
+    -- Up from l
     Up[_]_ : ∀ { l : Mode } → (m ≥ l) → Prop l → Prop m
-    -- Down
+    -- Down from l
     Down[_]_ : ∀ { l : Mode } → (l ≥ m) → Prop l → Prop m
+
+  -- Example propositions
+  Linear : Mode
+  Linear = record { structRules = ∅ }
+
+  Unrestricted : Mode
+  Unrestricted  = record { structRules = ∅ }
+
+  postulate
+    A : U
+    B : U
+
+    U≥L : Unrestricted ≥ Linear
+
+  Aₗ : Prop Linear
+  Aₗ = ` A
+  Bₗ : Prop Linear
+  Bₗ = ` B
+
+  LinearProp : Prop Linear
+  LinearProp = Aₗ ⊸ Bₗ
+
+  UnrestrictedProp : Prop Unrestricted
+  UnrestrictedProp = Up[ U≥L ] LinearProp
+
+  DownshiftedProp : Prop Linear
+  DownshiftedProp = Down[ U≥L ] UnrestrictedProp
 
   -- Introducing the HProp as a wrapper for moded propositions to allow for lists
   -- of propositions with heterogenous modes
@@ -169,8 +197,25 @@ module ExplicitAdj (U : Set) (_≥_ : Mode → Mode → Set) where
         ----------------------------------
         → (` (Aₘ ⊸ Bₘ) , (Ψ₁ ++ Ψ₂)) ⊢ Cₖ
     -- Multiplicative unit
-    -- Down shift
-    -- Up shift
+    𝟙R : ∀ { m : Mode } { Ψ : List HProp }
+        → StructRule.W ∈ σ(Ψ)
+        -----------------------
+        → Ψ ⊢ 1[ m ]
 
+    𝟙L : ∀ { m k : Mode } { Ψ : List HProp } { Cₖ : Prop k }
+        → Ψ ⊢ Cₖ
+        ----------
+        → (` 1[ m ] , Ψ) ⊢ Cₖ 
+
+    -- Down shift
+    DownR : ∀ { m k : Mode } { Ψ : List HProp } { Aₘ : Prop m } { m≥k : m ≥ k }
+        → Ψ ≥ˡ m    →   Ψ ⊢ Aₘ
+        -----------------------
+        → Ψ ⊢ Down[ m≥k ] Aₘ
     
- 
+    DownL : ∀ { m l k : Mode } { Ψ : List HProp } { Aₘ : Prop m } { Cₗ : Prop l } { m≥k : m ≥ k }
+        → (` Aₘ , Ψ) ⊢ Cₗ 
+        ------------------
+        → (` Down[ m≥k ] Aₘ , Ψ) ⊢ Cₗ
+    -- Up shift
+    
