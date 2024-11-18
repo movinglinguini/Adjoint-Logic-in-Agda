@@ -218,4 +218,12 @@ module ExplicitAdj (U : Set) (_≥_ : Mode → Mode → Set) where
         ------------------
         → (` Down[ m≥k ] Aₘ , Ψ) ⊢ Cₗ
     -- Up shift
-    
+    UpR : ∀ { m k : Mode } { Ψ : List HProp } { Aₖ : Prop k } { m≥k : m ≥ k }
+        → Ψ ⊢ Aₖ
+        -----------
+        → Ψ ⊢ Up[ m≥k ] Aₖ
+
+    UpL : ∀ { m k l : Mode } { Ψ : List HProp } { Aₖ : Prop k } { Cₗ : Prop l } { m≥k : m ≥ k }
+        → k ≥ l         →       (` Aₖ , Ψ) ⊢ Cₗ
+        ----------------------------------------
+        → (` Up[ m≥k ] Aₖ , Ψ) ⊢ Cₗ  
