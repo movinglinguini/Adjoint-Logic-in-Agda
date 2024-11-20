@@ -7,7 +7,7 @@ open import Data.Bool using (Bool; false; true)
 
 open import Mode using (StructRule; Mode; rulesOf)
 
-module ExplicitAdj (U : Set) (_≥_ : Mode → Mode → Set) where
+module ExplicitAdj (U : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_≥?_ : Mode → Mode → Bool) where
 
   infix 10 _⊗_
   infix 10 _⊕_
@@ -99,14 +99,21 @@ module ExplicitAdj (U : Set) (_≥_ : Mode → Mode → Set) where
   
   infix 5 _⊢_
 
+  leastModeOf : List HProp → Mode → Mode
+  leastModeOf ∅ m = m
+  leastModeOf (` A , Ψ) m with modeOf A ≥? m
+  ... | true = leastModeOf Ψ m
+  ... | false = leastModeOf Ψ (modeOf A)
+    
   -- Definition for comparing a mode to all modes of a list of propositions
+
   data _≥ˡ_ : ∀ (Ψ : List HProp) (k : Mode) → Set where
     ∅≥k : ∀ { k : Mode }
       ---------------------
       → ∅ ≥ˡ k
 
     P≥k : ∀ { m : Mode } { B : Prop m } { Ψ : List HProp } { k : Mode }
-      → (` B) ∈ Ψ → (modeOf (B)) ≥ k 
+      → (leastModeOf Ψ BotMode) ≥ k 
       ------------------------------
       → Ψ ≥ˡ k
 
@@ -127,12 +134,12 @@ module ExplicitAdj (U : Set) (_≥_ : Mode → Mode → Set) where
 
     {- Structural Rules -}
     weaken : ∀ { m k : Mode } { Ψ : List HProp } { Cₖ : Prop k } { Aₘ : Prop m }
-        → StructRule.W ∈ σ(` Aₘ , ∅)    →   Ψ ⊢ Cₖ
+        → StructRule.W ∈ (rulesOf m)    →   Ψ ⊢ Cₖ
         ---------------------------------------------
         → (` Aₘ , Ψ) ⊢ Cₖ
 
     contract : ∀ { m k : Mode } { Ψ : List HProp } { Cₖ : Prop k } { Aₘ : Prop m }
-        → StructRule.C ∈ σ(` Aₘ , ∅)  → ((` Aₘ) , (` Aₘ) , Ψ) ⊢ Cₖ
+        → StructRule.C ∈ (rulesOf m)  → ((` Aₘ) , (` Aₘ) , Ψ) ⊢ Cₖ
         -----------------------------------------------------------
         → (` Aₘ , Ψ) ⊢ Cₖ
 
