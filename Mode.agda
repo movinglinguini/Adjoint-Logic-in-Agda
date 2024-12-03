@@ -16,11 +16,14 @@ module Mode where
   rulesOf record { structRules = structRules } = structRules
 
   -- some example modes
-  Linear : Mode
-  Linear = record { structRules = ∅ }
+  private
+    Linear : Mode
+    Linear = record { structRules = ∅ }
 
-  Unrestricted : Mode
-  Unrestricted = record { structRules = StructRule.W , StructRule.C , ∅ }
+    Unrestricted : Mode
+    Unrestricted = record { structRules = StructRule.W , StructRule.C , ∅ }
+
+  open Data.List public renaming (_∷_ to _,_; _∷ʳ_ to _,′_; [] to ∅)
 
 
 

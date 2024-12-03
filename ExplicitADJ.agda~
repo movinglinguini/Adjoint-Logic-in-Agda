@@ -7,13 +7,13 @@ open import Data.Bool using (Bool; false; true)
 
 open import Mode using (StructRule; Mode; rulesOf)
 
-module ExplicitADJ (U : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_≥?_ : (m k : Mode)  → Dec (m ≥ k)) where
+module ExplicitADJ (U : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_≥?_ : Mode → Mode → Bool) where
 
   infix 10 _⊗_
   infix 10 _⊕_
   infix 10 _&_
   infix 10 _⊸_
-  infix 10 𝟙
+  infix 10 1[_]
 
   data Prop (m : Mode) : Set where
     -- An arbitrary proposition
@@ -23,7 +23,7 @@ module ExplicitADJ (U : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_
     -- Tensor
     _⊗_ : Prop m → Prop m → Prop m
     -- Unit
-    𝟙 : Prop m
+    1[_] : Mode → Prop m
     -- Plus - Using the binary relation rather than the n-ary version for simplicity
     _⊕_ : Prop m → Prop m → Prop m
     -- With - Using the binary version rather than the n-ary version for simplicity
@@ -102,8 +102,8 @@ module ExplicitADJ (U : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_
   leastModeOf : List HProp → Mode → Mode
   leastModeOf ∅ m = m
   leastModeOf (` A , Ψ) m with modeOf A ≥? m
-  ... | yes _ = leastModeOf Ψ m
-  ... | no _ = leastModeOf Ψ (modeOf A)
+  ... | true = leastModeOf Ψ m
+  ... | false = leastModeOf Ψ (modeOf A)
     
   -- Definition for comparing a mode to all modes of a list of propositions
 
@@ -207,12 +207,12 @@ module ExplicitADJ (U : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_
     𝟙R : ∀ { m : Mode } { Ψ : List HProp }
         → StructRule.W ∈ σ(Ψ)
         -----------------------
-        → Ψ ⊢ 𝟙 {m}
+        → Ψ ⊢ 1[ m ]
 
     𝟙L : ∀ { m k : Mode } { Ψ : List HProp } { Cₖ : Prop k }
         → Ψ ⊢ Cₖ
         ----------
-        → ((` (𝟙 {m})) , Ψ) ⊢ Cₖ 
+        → ((` 1[ m ]) , Ψ) ⊢ Cₖ 
 
     -- Down shift
     DownR : ∀ { m k : Mode } { Ψ : List HProp } { Aₘ : Prop m } { m≥k : m ≥ k }
