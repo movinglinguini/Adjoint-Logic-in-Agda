@@ -1,0 +1,4 @@
+name: agda-adj
+include: src
+depend: standard-library-2.1
+flags:
