@@ -4,10 +4,17 @@ open import Data.List using (List; _++_) renaming (_∷_ to _,_; _∷ʳ_ to _,�
 open import Data.List.Membership.Propositional using (_∈_)
 open import Relation.Nullary using (¬_; Dec; yes; no)
 open import Data.Bool using (Bool; false; true)
+open import Data.String hiding (_++_)
 
 open import Mode using (StructRule; Mode; rulesOf)
 
-module ExplicitADJ (U : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_≥?_ : (m k : Mode)  → Dec (m ≥ k)) where
+module ExplicitADJ 
+    (U : Set) 
+    (T : Set) 
+    (BotMode : Mode) 
+    (_≥_ : Mode → Mode → Set) 
+    (_≥?_ : (m k : Mode)  → Dec (m ≥ k))
+    where
 
   infix 10 _⊗_
   infix 10 _⊕_
@@ -24,6 +31,8 @@ module ExplicitADJ (U : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_
     _⊗_ : Prop m → Prop m → Prop m
     -- Unit
     𝟙 : Prop m
+    -- Top
+    ⊤ : Prop m
     -- Plus - Using the binary relation rather than the n-ary version for simplicity
     _⊕_ : Prop m → Prop m → Prop m
     -- With - Using the binary version rather than the n-ary version for simplicity
@@ -32,38 +41,45 @@ module ExplicitADJ (U : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_
     Up[_]_ : ∀ { l : Mode } → (m ≥ l) → Prop l → Prop m
     -- Down from l
     Down[_]_ : ∀ { l : Mode } → (l ≥ m) → Prop l → Prop m
+    -- For all
+    ∀[_]_ : String → Prop m → Prop m
 
   -- Example propositions
-  Linear : Mode
-  Linear = record { structRules = ∅ }
+  private
+    Linear : Mode
+    Linear = record { structRules = ∅ }
 
-  Unrestricted : Mode
-  Unrestricted  = record { structRules = ∅ }
+    Unrestricted : Mode
+    Unrestricted  = record { structRules = ∅ }
 
-  postulate
-    A : U
-    B : U
+    postulate
+        A : U
+        B : U
 
-    U≥L : Unrestricted ≥ Linear
+        U≥L : Unrestricted ≥ Linear
 
-  Aₗ : Prop Linear
-  Aₗ = ` A
-  Bₗ : Prop Linear
-  Bₗ = ` B
+    Aₗ : Prop Linear
+    Aₗ = ` A
+    Bₗ : Prop Linear
+    Bₗ = ` B
 
-  LinearProp : Prop Linear
-  LinearProp = Aₗ ⊸ Bₗ
+    LinearProp : Prop Linear
+    LinearProp = Aₗ ⊸ Bₗ
 
-  UnrestrictedProp : Prop Unrestricted
-  UnrestrictedProp = Up[ U≥L ] LinearProp
+    UnrestrictedProp : Prop Unrestricted
+    UnrestrictedProp = Up[ U≥L ] LinearProp
 
-  DownshiftedProp : Prop Linear
-  DownshiftedProp = Down[ U≥L ] UnrestrictedProp
+    DownshiftedProp : Prop Linear
+    DownshiftedProp = Down[ U≥L ] UnrestrictedProp
 
   -- Introducing the HProp as a wrapper for moded propositions to allow for lists
   -- of propositions with heterogenous modes
   data HProp : Set where
     `_ : ∀ { m : Mode } → Prop m → HProp
+
+  toHProps : ∀ { m } → List (Prop m) → List (HProp)
+  toHProps ∅ = ∅
+  toHProps (x , xs) = ` x ,  (toHProps xs)
 
   private
     {-
@@ -109,16 +125,16 @@ module ExplicitADJ (U : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_
 
   data _≥ˡ_ : ∀ (Ψ : List HProp) (k : Mode) → Set where
     ∅≥k : ∀ { k : Mode }
-      ---------------------
-      → ∅ ≥ˡ k
+        ---------------------
+        → ∅ ≥ˡ k
 
     P≥k : ∀ { m : Mode } { B : Prop m } { Ψ : List HProp } { k : Mode }
-      → (leastModeOf Ψ BotMode) ≥ k 
-      ------------------------------
-      → Ψ ≥ˡ k
+        → (leastModeOf Ψ BotMode) ≥ k 
+        ------------------------------
+        → Ψ ≥ˡ k
 
   {-
-    Finally, the Logical Rules
+    Finally, the rules
   -}
   data _⊢_ : ∀ {m : Mode} (Ψ : List HProp) → Prop m → Set where
     {- Axiom -}
@@ -233,4 +249,11 @@ module ExplicitADJ (U : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_
     UpL : ∀ { m k l : Mode } { Ψ : List HProp } { Aₖ : Prop k } { Cₗ : Prop l } { m≥k : m ≥ k }
         → k ≥ l         →       (` Aₖ , Ψ) ⊢ Cₗ
         ----------------------------------------
-        → (` Up[ m≥k ] Aₖ , Ψ) ⊢ Cₗ  
+        → (` Up[ m≥k ] Aₖ , Ψ) ⊢ Cₗ 
+
+    ∀L : ∀ { m k : Mode } { x : String } { Aₘ : Prop m } { Cₖ : Prop k } { Ψ : List HProp }
+        → ( sub : T → String → Prop m → Prop m )
+        → ( i : T )
+        → (` (sub i x Aₘ) , Ψ) ⊢ Cₖ
+        -------------------------------------
+        → (` (∀[ x ] Aₘ) , Ψ) ⊢ Cₖ
