@@ -2,7 +2,7 @@ open import Data.List using (List; _++_; any) renaming (_∷_ to _,_; _∷ʳ_ to
 open import Data.List.Relation.Binary.Sublist.Setoid using (_⊇_)
 open import Relation.Binary.Core using (Rel)
 
-module Mode where
+module ADJ.Mode where
 
   data StructRule : Set where
     W : StructRule

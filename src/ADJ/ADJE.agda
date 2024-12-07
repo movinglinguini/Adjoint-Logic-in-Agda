@@ -5,9 +5,9 @@ open import Data.List.Membership.Propositional using (_∈_)
 open import Relation.Nullary using (¬_; Dec; yes; no)
 open import Data.Bool using (Bool; false; true)
 
-open import Mode using (StructRule; Mode; rulesOf)
+open import ADJ.Mode using (StructRule; Mode; rulesOf)
 
-module ExplicitADJ (U : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_≥?_ : (m k : Mode)  → Dec (m ≥ k)) where
+module ADJ.ADJE (U : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_≥?_ : (m k : Mode)  → Dec (m ≥ k)) where
 
   infix 10 _⊗_
   infix 10 _⊕_
@@ -33,32 +33,33 @@ module ExplicitADJ (U : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_
     -- Down from l
     Down[_]_ : ∀ { l : Mode } → (l ≥ m) → Prop l → Prop m
 
-  -- Example propositions
-  Linear : Mode
-  Linear = record { structRules = ∅ }
+  private
+    -- Example propositions
+    Linear : Mode
+    Linear = record { structRules = ∅ }
 
-  Unrestricted : Mode
-  Unrestricted  = record { structRules = ∅ }
+    Unrestricted : Mode
+    Unrestricted  = record { structRules = ∅ }
 
-  postulate
-    A : U
-    B : U
+    postulate
+      A : U
+      B : U
 
-    U≥L : Unrestricted ≥ Linear
+      U≥L : Unrestricted ≥ Linear
 
-  Aₗ : Prop Linear
-  Aₗ = ` A
-  Bₗ : Prop Linear
-  Bₗ = ` B
+    Aₗ : Prop Linear
+    Aₗ = ` A
+    Bₗ : Prop Linear
+    Bₗ = ` B
 
-  LinearProp : Prop Linear
-  LinearProp = Aₗ ⊸ Bₗ
+    LinearProp : Prop Linear
+    LinearProp = Aₗ ⊸ Bₗ
 
-  UnrestrictedProp : Prop Unrestricted
-  UnrestrictedProp = Up[ U≥L ] LinearProp
+    UnrestrictedProp : Prop Unrestricted
+    UnrestrictedProp = Up[ U≥L ] LinearProp
 
-  DownshiftedProp : Prop Linear
-  DownshiftedProp = Down[ U≥L ] UnrestrictedProp
+    DownshiftedProp : Prop Linear
+    DownshiftedProp = Down[ U≥L ] UnrestrictedProp
 
   -- Introducing the HProp as a wrapper for moded propositions to allow for lists
   -- of propositions with heterogenous modes
