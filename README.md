@@ -15,5 +15,5 @@ The ADJE module can be instantiated with the following inputs:
 
 ## References
 - Pruiksma, Klaas, William Chargin, Frank Pfenning, and Jason Reed. "Adjoint logic." Unpublished manuscript, April (2018).
-- Kokke, Pepijn. "Modelling Substructural Logics in Agda." (2014).
+- Kokke, Wen. "Modelling Substructural Logics in Agda." (2014).
 
