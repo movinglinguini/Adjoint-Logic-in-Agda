@@ -6,15 +6,9 @@ open import Relation.Nullary using (¬_; Dec; yes; no)
 open import Data.Bool using (Bool; false; true)
 open import Data.Nat using (ℕ)
 
-open import Mode using (StructRule; Mode; rulesOf)
+open import ADJ.Mode using (StructRule; Mode; rulesOf)
 
-module ExplicitADJ 
-    (U : Set) 
-    (T : Set) 
-    (BotMode : Mode) 
-    (_≥_ : Mode → Mode → Set) 
-    (_≥?_ : (m k : Mode)  → Dec (m ≥ k))
-    where
+module ADJ.ADJE (U : Set) (T : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_≥?_ : (m k : Mode)  → Dec (m ≥ k)) where
 
   infix 10 _⊗_
   infix 10 _⊕_
@@ -44,8 +38,8 @@ module ExplicitADJ
     -- For all
     ∀[_]_ : ℕ → Prop m → Prop m
 
-  -- Example propositions
   private
+    -- Example propositions
     Linear : Mode
     Linear = record { structRules = ∅ }
 
@@ -53,10 +47,10 @@ module ExplicitADJ
     Unrestricted  = record { structRules = ∅ }
 
     postulate
-        A : U
-        B : U
+      A : U
+      B : U
 
-        U≥L : Unrestricted ≥ Linear
+      U≥L : Unrestricted ≥ Linear
 
     Aₗ : Prop Linear
     Aₗ = ` A
