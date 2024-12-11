@@ -4,7 +4,7 @@ open import Data.List using (List; _++_) renaming (_∷_ to _,_; _∷ʳ_ to _,�
 open import Data.List.Membership.Propositional using (_∈_)
 open import Relation.Nullary using (¬_; Dec; yes; no)
 open import Data.Bool using (Bool; false; true)
-open import Data.String hiding (_++_)
+open import Data.Nat using (ℕ)
 
 open import Mode using (StructRule; Mode; rulesOf)
 
@@ -42,7 +42,7 @@ module ExplicitADJ
     -- Down from l
     Down[_]_ : ∀ { l : Mode } → (l ≥ m) → Prop l → Prop m
     -- For all
-    ∀[_]_ : String → Prop m → Prop m
+    ∀[_]_ : ℕ → Prop m → Prop m
 
   -- Example propositions
   private
@@ -251,8 +251,8 @@ module ExplicitADJ
         ----------------------------------------
         → (` Up[ m≥k ] Aₖ , Ψ) ⊢ Cₗ 
 
-    ∀L : ∀ { m k : Mode } { x : String } { Aₘ : Prop m } { Cₖ : Prop k } { Ψ : List HProp }
-        → ( sub : T → String → Prop m → Prop m )
+    ∀L : ∀ { m k : Mode } { x : ℕ } { Aₘ : Prop m } { Cₖ : Prop k } { Ψ : List HProp }
+        → ( sub : T → ℕ → Prop m → Prop m )
         → ( i : T )
         → (` (sub i x Aₘ) , Ψ) ⊢ Cₖ
         -------------------------------------
