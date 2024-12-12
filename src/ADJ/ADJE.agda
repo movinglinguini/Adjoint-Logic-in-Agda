@@ -8,13 +8,14 @@ open import Data.Nat using (ℕ)
 
 open import ADJ.Mode using (StructRule; Mode; rulesOf)
 
-module ADJ.ADJE (U : Set) (T : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_≥?_ : (m k : Mode)  → Dec (m ≥ k)) where
+module ADJ.ADJE (U : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_≥?_ : (m k : Mode)  → Dec (m ≥ k)) where
 
   infix 10 _⊗_
   infix 10 _⊕_
   infix 10 _&_
   infix 10 _⊸_
   infix 10 𝟙
+  
 
   data Prop (m : Mode) : Set where
     -- An arbitrary proposition
@@ -36,7 +37,7 @@ module ADJ.ADJE (U : Set) (T : Set) (BotMode : Mode) (_≥_ : Mode → Mode → 
     -- Down from l
     Down[_]_ : ∀ { l : Mode } → (l ≥ m) → Prop l → Prop m
     -- For all
-    ∀[_]_ : ℕ → Prop m → Prop m
+    all_ : Prop m → Prop m
 
   private
     -- Example propositions
@@ -213,6 +214,12 @@ module ADJ.ADJE (U : Set) (T : Set) (BotMode : Mode) (_≥_ : Mode → Mode → 
         → Ψ₁ ⊢ Aₘ   →   (` Bₘ , Ψ₂) ⊢ Cₖ
         ----------------------------------
         → (` (Aₘ ⊸ Bₘ) , (Ψ₁ ++ Ψ₂)) ⊢ Cₖ
+
+    -- Top - no left rule for top
+    ⊤R : ∀ { m : Mode } { Ψ : List HProp }
+        ------------------
+        → Ψ ⊢ ⊤ { m } 
+
     -- Multiplicative unit
     𝟙R : ∀ { m : Mode } { Ψ : List HProp }
         → StructRule.W ∈ σ(Ψ)
@@ -245,9 +252,18 @@ module ADJ.ADJE (U : Set) (T : Set) (BotMode : Mode) (_≥_ : Mode → Mode → 
         ----------------------------------------
         → (` Up[ m≥k ] Aₖ , Ψ) ⊢ Cₗ 
 
-    ∀L : ∀ { m k : Mode } { x : ℕ } { Aₘ : Prop m } { Cₖ : Prop k } { Ψ : List HProp }
-        → ( sub : T → ℕ → Prop m → Prop m )
-        → ( i : T )
-        → (` (sub i x Aₘ) , Ψ) ⊢ Cₖ
-        -------------------------------------
-        → (` (∀[ x ] Aₘ) , Ψ) ⊢ Cₖ
+    -- For all rules taken from Frank Pfenning's notes on sequent calculus: https://www.cs.cmu.edu/~fp/courses/atp/handouts/ch3-seqcalc.pdf
+    -- Note: Not too sure on allR
+    allR : ∀ { m : Mode } { Ψ : List HProp } { Aₘ : Prop m }
+        → (substitution : Prop m → Prop m)
+        → Ψ ⊢ substitution Aₘ
+        -----------------
+        → Ψ ⊢ all Aₘ
+
+    allL : ∀ { m k : Mode } { Ψ : List HProp } { Aₘ : Prop m } { Cₖ : Prop k }
+        → (substitution : Prop m → Prop m)
+        → (` (substitution Aₘ) , Ψ) ⊢ Cₖ
+        --------------------------
+        → (` all Aₘ , Ψ) ⊢ Cₖ
+
+    -- TODO: show local soundness and completeness of top and all
