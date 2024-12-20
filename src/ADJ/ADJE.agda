@@ -9,8 +9,9 @@ open import Data.Nat using (ℕ)
 open import ADJ.Mode using (StructRule; Mode; rulesOf)
 
 module ADJ.ADJE (U : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_≥?_ : (m k : Mode)  → Dec (m ≥ k)) where
-
-  infix 10 _⊗_
+  
+  infix 30 `_
+  infix 20 _⊗_
   infix 10 _⊕_
   infix 10 _&_
   infix 10 _⊸_
@@ -240,7 +241,7 @@ module ADJ.ADJE (U : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_≥
     DownL : ∀ { m l k : Mode } { Ψ : List HProp } { Aₘ : Prop m } { Cₗ : Prop l } { m≥k : m ≥ k }
         → (` Aₘ , Ψ) ⊢ Cₗ 
         ------------------
-        → (` Down[ m≥k ] Aₘ , Ψ) ⊢ Cₗ
+        → (` (Down[ m≥k ] Aₘ) , Ψ) ⊢ Cₗ
     -- Up shift
     UpR : ∀ { m k : Mode } { Ψ : List HProp } { Aₖ : Prop k } { m≥k : m ≥ k }
         → Ψ ⊢ Aₖ
@@ -250,7 +251,7 @@ module ADJ.ADJE (U : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_≥
     UpL : ∀ { m k l : Mode } { Ψ : List HProp } { Aₖ : Prop k } { Cₗ : Prop l } { m≥k : m ≥ k }
         → k ≥ l         →       (` Aₖ , Ψ) ⊢ Cₗ
         ----------------------------------------
-        → (` Up[ m≥k ] Aₖ , Ψ) ⊢ Cₗ 
+        → (` (Up[ m≥k ] Aₖ) , Ψ) ⊢ Cₗ 
 
     -- For all rules taken from Frank Pfenning's notes on sequent calculus: https://www.cs.cmu.edu/~fp/courses/atp/handouts/ch3-seqcalc.pdf
     -- Note: Not too sure on allR
@@ -264,6 +265,4 @@ module ADJ.ADJE (U : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_≥
         → (substitution : Prop m → Prop m)
         → (` (substitution Aₘ) , Ψ) ⊢ Cₖ
         --------------------------
-        → (` all Aₘ , Ψ) ⊢ Cₖ
-
-    -- TODO: show local soundness and completeness of top and all
+        → (` (all Aₘ) , Ψ) ⊢ Cₖ
