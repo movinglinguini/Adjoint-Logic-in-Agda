@@ -1,6 +1,6 @@
 open import Relation.Binary.PropositionalEquality as Eq
 open Eq using (_≡_)
-open import Data.List using (List; _++_) renaming (_∷_ to _,_; _∷ʳ_ to _,′_; [] to ∅)
+open import Data.List using (List) renaming (_∷_ to _,_; _∷ʳ_ to _,′_; [] to ∅)
 open import Data.List.Membership.Propositional using (_∈_)
 open import Relation.Nullary using (¬_; Dec; yes; no)
 open import Data.Bool using (Bool; false; true)
@@ -72,6 +72,16 @@ module ADJ.ADJE (Atoms : Set) (Terms : Set) (BotMode : Mode) (_≥_ : Mode → M
   -- of propositions with heterogenous modes
   data HProp : Set where
     `_ : ∀ { m : Mode } → Prop m → HProp
+  
+  infixr 5 _,_
+  data Context : Set where
+    ∅ : Context
+    _,_ : ∀ { m } → Context → Prop m → Context
+
+  -- Concatenating contexts
+  _++_ : Context → Context → Context
+  ∅ ++ R = R
+  (L , x) ++ R = L ++ (R , x)
 
   toHProps : ∀ { m } → List (Prop m) → List (HProp)
   toHProps ∅ = ∅
@@ -105,174 +115,175 @@ module ADJ.ADJE (Atoms : Set) (Terms : Set) (BotMode : Mode) (_≥_ : Mode → M
   modeOf { m } A = m
 
   -- Sigma of a list of propositions extracts the common structural rules of those propositions
-  σ : List HProp → List StructRule
+  σ : Context → List StructRule
   σ ∅ = StructRule.W , StructRule.C , ∅
-  σ (` A , As) = (rulesOf (modeOf A)) ∩ (σ As)
+  σ (As , A) = (rulesOf (modeOf A)) ∩ (σ As)
   
   infix 5 _⊢_
 
-  leastModeOf : List HProp → Mode → Mode
+  leastModeOf : Context → Mode → Mode
   leastModeOf ∅ m = m
-  leastModeOf (` A , Ψ) m with modeOf A ≥? m
+  leastModeOf (Ψ , A) m with modeOf A ≥? m
   ... | yes _ = leastModeOf Ψ m
   ... | no _ = leastModeOf Ψ (modeOf A)
     
   -- Definition for comparing a mode to all modes of a list of propositions
 
-  data _≥ˡ_ : ∀ (Ψ : List HProp) (k : Mode) → Set where
+  data _≥ˡ_ : ∀ (Ψ : Context) (k : Mode) → Set where
     ∅≥k : ∀ { k : Mode }
         ---------------------
         → ∅ ≥ˡ k
 
-    P≥k : ∀ { m : Mode } { B : Prop m } { Ψ : List HProp } { k : Mode }
-        → (leastModeOf Ψ BotMode) ≥ k 
-        ------------------------------
-        → Ψ ≥ˡ k
+    P≥k : ∀ { m : Mode } { B : Prop m } { Ψ : Context } { k : Mode }
+      → (leastModeOf Ψ BotMode) ≥ k 
+      ------------------------------
+      → Ψ ≥ˡ k
 
   {-
     Finally, the rules
   -}
-  data _⊢_ : ∀ {m : Mode} (Ψ : List HProp) → Prop m → Set where
+  data _⊢_ : ∀ {m : Mode} (Ψ : Context) → Prop m → Set where
     {- Axiom -}
     id : ∀ {m : Mode} { A : Prop m }
         ------------------------------
-        → (` A , ∅) ⊢ A
+        → (∅ , A) ⊢ A
 
     {- Cut -}
-    cut : ∀ {m k l : Mode} { Ψ₁ Ψ₂ : List HProp } {Cₖ : Prop k} { Aₘ : Prop m }
-        → Ψ₁ ≥ˡ m → m ≥ k     →   Ψ₁ ⊢ Aₘ   → (` Aₘ , Ψ₂) ⊢ Cₖ 
+    cut : ∀ {m k l : Mode} { Ψ₁ Ψ₂ : Context } {Cₖ : Prop k} { Aₘ : Prop m }
+        → Ψ₁ ≥ˡ m → m ≥ k     →   Ψ₁ ⊢ Aₘ   → (Ψ₂ , Aₘ) ⊢ Cₖ 
         -------------------------------------------------------
         → (Ψ₁ ++ Ψ₂) ⊢ Cₖ
 
     {- Structural Rules -}
-    weaken : ∀ { m k : Mode } { Ψ : List HProp } { Cₖ : Prop k } { Aₘ : Prop m }
+    weaken : ∀ { m k : Mode } { Ψ : Context } { Cₖ : Prop k } { Aₘ : Prop m }
         → StructRule.W ∈ (rulesOf m)    →   Ψ ⊢ Cₖ
         ---------------------------------------------
-        → (` Aₘ , Ψ) ⊢ Cₖ
+        → (Ψ , Aₘ) ⊢ Cₖ
 
-    contract : ∀ { m k : Mode } { Ψ : List HProp } { Cₖ : Prop k } { Aₘ : Prop m }
-        → StructRule.C ∈ (rulesOf m)  → ((` Aₘ) , (` Aₘ) , Ψ) ⊢ Cₖ
+    contract : ∀ { m k : Mode } { Ψ : Context } { Cₖ : Prop k } { Aₘ : Prop m }
+        → StructRule.C ∈ (rulesOf m)  → ((Ψ , Aₘ) , Aₘ) ⊢ Cₖ
         -----------------------------------------------------------
-        → (` Aₘ , Ψ) ⊢ Cₖ
+        → (Ψ , Aₘ) ⊢ Cₖ
 
     -- Exchange isn't included in the ADJ paper, and instead is left as implicitly admitted.
     -- Writing it in the style of Abramsky's Computational interpretations of linear logic, where we are
     -- exchanging propositions. This is in contrast to Wen Kokke's model of intuitionistic logic, where
     -- she exchanges whole pieces of context.
-    exchange : ∀ { m k l : Mode } { Ψ₁ Ψ₂ : List HProp } { Aₘ : Prop m } { Bₗ : Prop l } { Cₖ : Prop k }
-        → ((Ψ₁ ,′ (` Aₘ)) ++ ((` Bₗ) , Ψ₂)) ⊢ Cₖ
+    exchange : ∀ { m k l : Mode } { Ψ₁ Ψ₂ : Context } { Aₘ : Prop m } { Bₗ : Prop l } { Cₖ : Prop k }
+        → ((Ψ₁ , Aₘ) ++ (Ψ₂ , Bₗ)) ⊢ Cₖ
         ------------------------------------
-        → ((Ψ₁ ,′ (` Bₗ)) ++ ((` Aₘ) , Ψ₂)) ⊢ Cₖ
+        → ((Ψ₁ ,  Bₗ) ++ (Ψ₂ , Aₘ)) ⊢ Cₖ
     
-    -- Oplus
-    ⊕R₁ : ∀ { m : Mode } { Ψ : List HProp } { Aₘ : Prop m } { Bₘ : Prop m }
+    -- -- Oplus
+    ⊕R₁ : ∀ { m : Mode } { Ψ : Context } { Aₘ : Prop m } { Bₘ : Prop m }
         → Ψ ⊢ Aₘ
         ---------------
         → Ψ ⊢ Aₘ ⊕ Bₘ
 
-    ⊕R₂ : ∀ { m : Mode } { Ψ : List HProp } { Aₘ : Prop m } { Bₘ : Prop m }
+    ⊕R₂ : ∀ { m : Mode } { Ψ : Context } { Aₘ : Prop m } { Bₘ : Prop m }
         → Ψ ⊢ Bₘ
         ---------------
         → Ψ ⊢ Aₘ ⊕ Bₘ
     
-    ⊕L : ∀ { m k : Mode } { Ψ : List HProp } { Aₘ : Prop m } { Bₘ : Prop m } { Cₖ : Prop k }
-        → (` Aₘ , Ψ) ⊢ Cₖ   →   (` Bₘ , Ψ ) ⊢ Cₖ
+    ⊕L : ∀ { m k : Mode } { Ψ : Context } { Aₘ : Prop m } { Bₘ : Prop m } { Cₖ : Prop k }
+        → (Ψ , Aₘ) ⊢ Cₖ   →   (Ψ , Bₘ) ⊢ Cₖ
         -----------------------------------------
-        → (` (Aₘ ⊕ Bₘ) , Ψ) ⊢ Cₖ 
+        → (Ψ , Aₘ ⊕ Bₘ) ⊢ Cₖ 
 
-    -- With
-    &R : ∀ { m : Mode } { Ψ : List HProp } { Aₘ Bₘ : Prop m }
+    -- -- With
+    &R : ∀ { m : Mode } { Ψ : Context } { Aₘ Bₘ : Prop m }
         → Ψ ⊢ Aₘ    →   Ψ ⊢ Bₘ
         ------------------------
         → Ψ ⊢ Aₘ & Bₘ
 
-    &L₁ : ∀ { m k : Mode } { Ψ : List HProp } { Aₘ Bₘ : Prop m } { Cₖ : Prop k }
-        → (` Aₘ , Ψ) ⊢ Cₖ
+    &L₁ : ∀ { m k : Mode } { Ψ : Context } { Aₘ Bₘ : Prop m } { Cₖ : Prop k }
+        → (Ψ , Aₘ) ⊢ Cₖ
         --------------
-        → (` (Aₘ & Bₘ) , Ψ) ⊢ Cₖ
+        → (Ψ , (Aₘ & Bₘ)) ⊢ Cₖ
 
-    &L₂ : ∀ { m k : Mode } { Ψ : List HProp } { Aₘ Bₘ : Prop m } { Cₖ : Prop k }
-        → (` Bₘ , Ψ) ⊢ Cₖ
+    &L₂ : ∀ { m k : Mode } { Ψ : Context } { Aₘ Bₘ : Prop m } { Cₖ : Prop k }
+        → (Ψ , Bₘ) ⊢ Cₖ
         --------------
-        → (` (Aₘ & Bₘ) , Ψ) ⊢ Cₖ 
-    -- Tensor
-    ⊗R : ∀ { m : Mode } { Ψ₁ Ψ₂ : List HProp } { Aₘ Bₘ : Prop m }
+        → (Ψ , (Aₘ & Bₘ)) ⊢ Cₖ 
+    -- -- Tensor
+    ⊗R : ∀ { m : Mode } { Ψ₁ Ψ₂ : Context } { Aₘ Bₘ : Prop m }
         → Ψ₁ ⊢ Aₘ   →   Ψ₂ ⊢ Bₘ
         -------------------------
         → (Ψ₁ ++ Ψ₂) ⊢ Aₘ ⊗ Bₘ
 
-    ⊗L : ∀ { m k : Mode } { Ψ : List HProp } { Aₘ Bₘ : Prop m } { Cₖ : Prop k }
-        → (` Aₘ , ` Bₘ , Ψ) ⊢ Cₖ
+    ⊗L : ∀ { m k : Mode } { Ψ : Context } { Aₘ Bₘ : Prop m } { Cₖ : Prop k }
+        → ((Ψ , Aₘ ), Bₘ ) ⊢ Cₖ
         --------------------------
-        → (` (Aₘ ⊗ Bₘ) , Ψ) ⊢ Cₖ
-    -- Lolli
-    ⊸R : ∀ { m : Mode } { Ψ : List HProp } { Aₘ Bₘ : Prop m }
-        → (` Aₘ , Ψ) ⊢ Bₘ
+        → (Ψ , (Aₘ ⊗ Bₘ)) ⊢ Cₖ
+    -- -- Lolli
+    ⊸R : ∀ { m : Mode } { Ψ : Context } { Aₘ Bₘ : Prop m }
+        → (Ψ , Aₘ) ⊢ Bₘ
         --------------------
         → Ψ ⊢ Aₘ ⊸ Bₘ
 
-    ⊸L : ∀ { m k : Mode } { Ψ₁ Ψ₂ : List HProp } { Aₘ Bₘ : Prop m } { Cₖ : Prop k }
-        → Ψ₁ ⊢ Aₘ   →   (` Bₘ , Ψ₂) ⊢ Cₖ
+    ⊸L : ∀ { m k : Mode } { Ψ₁ Ψ₂ : Context } { Aₘ Bₘ : Prop m } { Cₖ : Prop k }
+        → Ψ₁ ⊢ Aₘ   →   (Ψ₂ , Bₘ) ⊢ Cₖ
         ----------------------------------
-        → (` (Aₘ ⊸ Bₘ) , (Ψ₁ ++ Ψ₂)) ⊢ Cₖ
+        → ((Ψ₁ ++ Ψ₂) , (Aₘ ⊸ Bₘ)) ⊢ Cₖ
 
     -- Top - no left rule for top
-    ⊤R : ∀ { m : Mode } { Ψ : List HProp }
+    ⊤R : ∀ { m : Mode } { Ψ : Context }
         ------------------
         → Ψ ⊢ ⊤ { m } 
 
-    -- Multiplicative unit
-    𝟙R : ∀ { m : Mode } { Ψ : List HProp }
+    -- -- Multiplicative unit
+    𝟙R : ∀ { m : Mode } { Ψ : Context }
         → StructRule.W ∈ σ(Ψ)
         -----------------------
         → Ψ ⊢ 𝟙 {m}
 
-    𝟙L : ∀ { m k : Mode } { Ψ : List HProp } { Cₖ : Prop k }
+    𝟙L : ∀ { m k : Mode } { Ψ : Context } { Cₖ : Prop k }
         → Ψ ⊢ Cₖ
         ----------
-        → ((` (𝟙 {m})) , Ψ) ⊢ Cₖ 
+        → (Ψ , 𝟙 {m}) ⊢ Cₖ 
 
-    -- Down shift
-    DownR : ∀ { m k : Mode } { Ψ : List HProp } { Aₘ : Prop m } { m≥k : m ≥ k }
+    -- -- Down shift
+    DownR : ∀ { m k : Mode } { Ψ : Context } { Aₘ : Prop m } { m≥k : m ≥ k }
         → Ψ ≥ˡ m    →   Ψ ⊢ Aₘ
         -----------------------
         → Ψ ⊢ Down[ m≥k ] Aₘ
     
-    DownL : ∀ { m l k : Mode } { Ψ : List HProp } { Aₘ : Prop m } { Cₗ : Prop l } { m≥k : m ≥ k }
-        → (` Aₘ , Ψ) ⊢ Cₗ 
+    DownL : ∀ { m l k : Mode } { Ψ : Context } { Aₘ : Prop m } { Cₗ : Prop l } { m≥k : m ≥ k }
+        → (Ψ , Aₘ) ⊢ Cₗ 
         ------------------
-        → (` (Down[ m≥k ] Aₘ) , Ψ) ⊢ Cₗ
-    -- Up shift
-    UpR : ∀ { m k : Mode } { Ψ : List HProp } { Aₖ : Prop k } { m≥k : m ≥ k }
+        → (Ψ , Down[ m≥k ] Aₘ) ⊢ Cₗ
+    -- -- Up shift
+    UpR : ∀ { m k : Mode } { Ψ : Context } { Aₖ : Prop k } { m≥k : m ≥ k }
         → Ψ ⊢ Aₖ
         -----------
         → Ψ ⊢ Up[ m≥k ] Aₖ
 
-    UpL : ∀ { m k l : Mode } { Ψ : List HProp } { Aₖ : Prop k } { Cₗ : Prop l } { m≥k : m ≥ k }
-        → k ≥ l         →       (` Aₖ , Ψ) ⊢ Cₗ
+    UpL : ∀ { m k l : Mode } { Ψ : Context } { Aₖ : Prop k } { Cₗ : Prop l } { m≥k : m ≥ k }
+        → k ≥ l         →       (Ψ , Aₖ) ⊢ Cₗ
         ----------------------------------------
-        → (` (Up[ m≥k ] Aₖ) , Ψ) ⊢ Cₗ 
+        → (Ψ , Up[ m≥k ] Aₖ) ⊢ Cₗ  
 
     -- For all rules taken from Frank Pfenning's notes on sequent calculus: https://www.cs.cmu.edu/~fp/courses/atp/handouts/ch3-seqcalc.pdf
     -- Note: Not too sure on allR
-    ∀R : ∀ { m : Mode } { Ψ : List HProp } { Aₘ : Prop m }
+    ∀R : ∀ { m : Mode } { Ψ : Context } { Aₘ : Prop m }
         → (substitution : Prop m → Prop m)
         → Ψ ⊢ substitution Aₘ
         -----------------
         → Ψ ⊢ ∀[ Aₘ ]
 
     -- We encode two versions of for all: one where the proposition being eliminated is weakenable and one where it is not.
-    ∀L-1 : ∀ { m k : Mode } { Ψ : List HProp } { Aₘ : Prop m } { Cₖ : Prop k }
+    ∀L-1 : ∀ { m k : Mode } { Ψ : Context } { Aₘ : Prop m } { Cₖ : Prop k }
         → (substitution : Terms → Prop m → Prop m)
         → (t : Terms)
-        → (` (substitution t Aₘ) , Ψ) ⊢ Cₖ
+        → (Ψ , (substitution t Aₘ)) ⊢ Cₖ
         --------------------------
-        → (` (∀[ Aₘ ]) , Ψ) ⊢ Cₖ
+        → (Ψ , ∀[ Aₘ ]) ⊢ Cₖ
 
-    ∀L-2 : ∀ { m k : Mode } { Ψ : List HProp } { Aₘ : Prop m } { Cₖ : Prop k }
+    ∀L-2 : ∀ { m k : Mode } { Ψ : Context } { Aₘ : Prop m } { Cₖ : Prop k }
         → (substitution : Terms → Prop m → Prop m)
         → (t : Terms)
         → StructRule.W ∈ rulesOf (modeOf (∀[ Aₘ ]))
-        → (` (∀[ Aₘ ]) , ` (substitution t Aₘ) , Ψ) ⊢ Cₖ
+        → ((Ψ , ∀[ Aₘ ]) , (substitution t Aₘ)) ⊢ Cₖ
         ----------------------------------------------
-        → (` (∀[ Aₘ ]) , Ψ) ⊢ Cₖ
+        → (Ψ , (∀[ Aₘ ])) ⊢ Cₖ
+        
