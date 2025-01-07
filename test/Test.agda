@@ -1,5 +1,6 @@
-open import Data.Nat hiding (_≥_; _≟_; _≥?_)
+open import Data.Nat hiding (_≥_; _≥?_)
 open import Data.String hiding (_≟_)
+open import Data.Bool hiding (_≟_)
 open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality hiding (subst)
 open import Data.List.Relation.Binary.Sublist.Propositional using (_⊇_)
@@ -25,13 +26,13 @@ module Test where
   ModeUnr = record { structRules = (StructRule.W , StructRule.C , ∅) }
 
   private
-    _≟_ : DecidableEquality StructRule
-    StructRule.W ≟ StructRule.W = yes refl
-    StructRule.W ≟ StructRule.C = no λ()
-    StructRule.C ≟ StructRule.W = no λ()
-    StructRule.C ≟ StructRule.C = yes refl
+    _≟S_ : DecidableEquality StructRule
+    StructRule.W ≟S StructRule.W = yes refl
+    StructRule.W ≟S StructRule.C = no λ()
+    StructRule.C ≟S StructRule.W = no λ()
+    StructRule.C ≟S StructRule.C = yes refl
 
-  open import Data.List.Relation.Binary.Sublist.DecPropositional _≟_ using (_⊆?_)
+  open import Data.List.Relation.Binary.Sublist.DecPropositional _≟S_ using (_⊆?_)
 
   -- Our preorder on modes
   _≥_ : Mode → Mode → Set
@@ -47,20 +48,13 @@ module Test where
 
   -- Test propositon
 
-  PropA : Prop ModeLin
-  PropA = ∀[ ` v[ # 0 ] ⊸ ` v[ false ] ]
-
-  PropB : Prop ModeLin
-  PropB = ` v[ true ]
-
-  PropC : Prop ModeLin
-  PropC = ` v[ false ]
-
   subst : ∀ { m } → Term → Prop m → Prop m
   subst t (` v) = ` v
   subst t (` v[ true ]) = ` v[ true ]
   subst t (` v[ false ]) = ` v[ false ]
-  subst t (` v[ # x ]) = {!   !}
+  subst t (` v[ # x ]) with x
+  ... | zero = ` v[ t ]
+  ... | suc x = ` v[ # x ]
   subst t (P ⊸ P₁) = (subst t P) ⊸ (subst t P₁)
   subst t (P ⊗ P₁) = (subst t P) ⊗ (subst t P₁)
   subst t 𝟙 = 𝟙
@@ -69,7 +63,17 @@ module Test where
   subst t (P & P₁) = (subst t P) & (subst t P₁)
   subst t (Up[ x ] P) = Up[ x ] (subst t P)
   subst t (Down[ x ] P) = Down[ x ] (subst t P)
-  subst t ∀[ P ] = {!   !}
+  subst t ∀[ P ] = ∀[ subst t P ]
+
+  PropA : Prop ModeLin
+  PropA = ∀[ ` v[ # 0 ] ⊸ ` v[ false ] ]
+
+  PropB : Prop ModeLin
+  PropB = ` v[ true ]
+
+  PropC : Prop ModeLin
+  PropC = ` v[ false ]
  
-  _ : (` PropA , ` PropB , ∅) ⊢ PropC
-  _ = {!   !}
+  _ : ((∅ , PropB) , PropA) ⊢ PropC
+  _ = ∀L₁ subst true (⊸L {_} {_} {∅ , PropB} {∅} id id)
+  

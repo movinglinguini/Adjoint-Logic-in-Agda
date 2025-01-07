@@ -272,14 +272,14 @@ module ADJ.ADJE (Atoms : Set) (Terms : Set) (BotMode : Mode) (_≥_ : Mode → M
         → Ψ ⊢ ∀[ Aₘ ]
 
     -- We encode two versions of for all: one where the proposition being eliminated is weakenable and one where it is not.
-    ∀L-1 : ∀ { m k : Mode } { Ψ : Context } { Aₘ : Prop m } { Cₖ : Prop k }
+    ∀L₁ : ∀ { m k : Mode } { Ψ : Context } { Aₘ : Prop m } { Cₖ : Prop k }
         → (substitution : Terms → Prop m → Prop m)
         → (t : Terms)
         → (Ψ , (substitution t Aₘ)) ⊢ Cₖ
         --------------------------
         → (Ψ , ∀[ Aₘ ]) ⊢ Cₖ
 
-    ∀L-2 : ∀ { m k : Mode } { Ψ : Context } { Aₘ : Prop m } { Cₖ : Prop k }
+    ∀L₂ : ∀ { m k : Mode } { Ψ : Context } { Aₘ : Prop m } { Cₖ : Prop k }
         → (substitution : Terms → Prop m → Prop m)
         → (t : Terms)
         → StructRule.W ∈ rulesOf (modeOf (∀[ Aₘ ]))
