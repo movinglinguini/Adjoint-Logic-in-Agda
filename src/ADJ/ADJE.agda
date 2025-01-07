@@ -8,7 +8,7 @@ open import Data.Nat using (ℕ)
 
 open import ADJ.Mode using (StructRule; Mode; rulesOf)
 
-module ADJ.ADJE (U : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_≥?_ : (m k : Mode)  → Dec (m ≥ k)) where
+module ADJ.ADJE (Atoms : Set) (Terms : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_≥?_ : (m k : Mode)  → Dec (m ≥ k)) where
   
   infix 30 `_
   infix 20 _⊗_
@@ -20,7 +20,7 @@ module ADJ.ADJE (U : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_≥
 
   data Prop (m : Mode) : Set where
     -- An arbitrary proposition
-    `_  : (A : U) → Prop m
+    `_  : (A : Atoms) → Prop m
     -- Implication
     _⊸_ : Prop m → Prop m → Prop m
     -- Tensor
@@ -38,7 +38,7 @@ module ADJ.ADJE (U : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_≥
     -- Down from l
     Down[_]_ : ∀ { l : Mode } → (l ≥ m) → Prop l → Prop m
     -- For all
-    all_ : Prop m → Prop m
+    ∀[_] : Prop m → Prop m
 
   private
     -- Example propositions
@@ -49,8 +49,8 @@ module ADJ.ADJE (U : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_≥
     Unrestricted  = record { structRules = ∅ }
 
     postulate
-      A : U
-      B : U
+      A : Atoms
+      B : Atoms
 
       U≥L : Unrestricted ≥ Linear
 
@@ -255,14 +255,24 @@ module ADJ.ADJE (U : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_≥
 
     -- For all rules taken from Frank Pfenning's notes on sequent calculus: https://www.cs.cmu.edu/~fp/courses/atp/handouts/ch3-seqcalc.pdf
     -- Note: Not too sure on allR
-    allR : ∀ { m : Mode } { Ψ : List HProp } { Aₘ : Prop m }
+    ∀R : ∀ { m : Mode } { Ψ : List HProp } { Aₘ : Prop m }
         → (substitution : Prop m → Prop m)
         → Ψ ⊢ substitution Aₘ
         -----------------
-        → Ψ ⊢ all Aₘ
+        → Ψ ⊢ ∀[ Aₘ ]
 
-    allL : ∀ { m k : Mode } { Ψ : List HProp } { Aₘ : Prop m } { Cₖ : Prop k }
-        → (substitution : Prop m → Prop m)
-        → (` (substitution Aₘ) , Ψ) ⊢ Cₖ
+    -- We encode two versions of for all: one where the proposition being eliminated is weakenable and one where it is not.
+    ∀L-1 : ∀ { m k : Mode } { Ψ : List HProp } { Aₘ : Prop m } { Cₖ : Prop k }
+        → (substitution : Terms → Prop m → Prop m)
+        → (t : Terms)
+        → (` (substitution t Aₘ) , Ψ) ⊢ Cₖ
         --------------------------
-        → (` (all Aₘ) , Ψ) ⊢ Cₖ
+        → (` (∀[ Aₘ ]) , Ψ) ⊢ Cₖ
+
+    ∀L-2 : ∀ { m k : Mode } { Ψ : List HProp } { Aₘ : Prop m } { Cₖ : Prop k }
+        → (substitution : Terms → Prop m → Prop m)
+        → (t : Terms)
+        → StructRule.W ∈ rulesOf (modeOf (∀[ Aₘ ]))
+        → (` (∀[ Aₘ ]) , ` (substitution t Aₘ) , Ψ) ⊢ Cₖ
+        ----------------------------------------------
+        → (` (∀[ Aₘ ]) , Ψ) ⊢ Cₖ
