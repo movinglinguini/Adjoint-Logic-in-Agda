@@ -4,26 +4,31 @@ open import Data.List using (List) renaming (_∷_ to _,_; _∷ʳ_ to _,′_; []
 open import Data.List.Membership.Propositional using (_∈_)
 open import Relation.Nullary using (¬_; Dec; yes; no)
 open import Data.Bool using (Bool; false; true)
+open import Data.Nat using (ℕ)
 
 open import ADJ.Mode using (StructRule; Mode; rulesOf)
 
-module ADJ.ADJE (U : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_≥?_ : (m k : Mode)  → Dec (m ≥ k)) where
-
-  infix 10 _⊗_
+module ADJ.ADJE (Atoms : Set) (Terms : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_≥?_ : (m k : Mode)  → Dec (m ≥ k)) where
+  
+  infix 30 `_
+  infix 20 _⊗_
   infix 10 _⊕_
   infix 10 _&_
   infix 10 _⊸_
   infix 10 𝟙
+  
 
   data Prop (m : Mode) : Set where
     -- An arbitrary proposition
-    `_  : (A : U) → Prop m
+    `_  : (A : Atoms) → Prop m
     -- Implication
     _⊸_ : Prop m → Prop m → Prop m
     -- Tensor
     _⊗_ : Prop m → Prop m → Prop m
     -- Unit
     𝟙 : Prop m
+    -- Top
+    ⊤ : Prop m
     -- Plus - Using the binary relation rather than the n-ary version for simplicity
     _⊕_ : Prop m → Prop m → Prop m
     -- With - Using the binary version rather than the n-ary version for simplicity
@@ -32,6 +37,8 @@ module ADJ.ADJE (U : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_≥
     Up[_]_ : ∀ { l : Mode } → (m ≥ l) → Prop l → Prop m
     -- Down from l
     Down[_]_ : ∀ { l : Mode } → (l ≥ m) → Prop l → Prop m
+    -- For all
+    ∀[_] : Prop m → Prop m
 
   private
     -- Example propositions
@@ -42,8 +49,8 @@ module ADJ.ADJE (U : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_≥
     Unrestricted  = record { structRules = ∅ }
 
     postulate
-      A : U
-      B : U
+      A : Atoms
+      B : Atoms
 
       U≥L : Unrestricted ≥ Linear
 
@@ -73,8 +80,12 @@ module ADJ.ADJE (U : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_≥
 
   -- Concatenating contexts
   _++_ : Context → Context → Context
-  ∅ ++ R = R
-  (L , x) ++ R = L ++ (R , x)
+  L ++ ∅ = L
+  L ++ (R , x) = (L ++ R) , x
+
+  toHProps : ∀ { m } → List (Prop m) → List (HProp)
+  toHProps ∅ = ∅
+  toHProps (x , xs) = ` x ,  (toHProps xs)
 
   private
     {-
@@ -120,8 +131,8 @@ module ADJ.ADJE (U : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_≥
 
   data _≥ˡ_ : ∀ (Ψ : Context) (k : Mode) → Set where
     ∅≥k : ∀ { k : Mode }
-      ---------------------
-      → ∅ ≥ˡ k
+        ---------------------
+        → ∅ ≥ˡ k
 
     P≥k : ∀ { m : Mode } { B : Prop m } { Ψ : Context } { k : Mode }
       → (leastModeOf Ψ BotMode) ≥ k 
@@ -129,7 +140,7 @@ module ADJ.ADJE (U : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_≥
       → Ψ ≥ˡ k
 
   {-
-    Finally, the Logical Rules
+    Finally, the rules
   -}
   data _⊢_ : ∀ {m : Mode} (Ψ : Context) → Prop m → Set where
     {- Axiom -}
@@ -158,10 +169,10 @@ module ADJ.ADJE (U : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_≥
     -- Writing it in the style of Abramsky's Computational interpretations of linear logic, where we are
     -- exchanging propositions. This is in contrast to Wen Kokke's model of intuitionistic logic, where
     -- she exchanges whole pieces of context.
-    exchange : ∀ { m k l : Mode } { Ψ₁ Ψ₂ : Context } { Aₘ : Prop m } { Bₗ : Prop l } { Cₖ : Prop k }
-        → ((Ψ₁ , Aₘ) ++ (Ψ₂ , Bₗ)) ⊢ Cₖ
+    exchange : ∀ { k : Mode } { Ψ₁ Ψ₂ Ψ₃ Ψ₄ : Context } { Cₖ : Prop k }
+        → (Ψ₁ ++ Ψ₃) ++ (Ψ₂ ++ Ψ₄) ⊢ Cₖ
         ------------------------------------
-        → ((Ψ₁ ,  Bₗ) ++ (Ψ₂ , Aₘ)) ⊢ Cₖ
+        → (Ψ₁ ++ Ψ₂) ++ (Ψ₃ ++ Ψ₄) ⊢ Cₖ
     
     -- -- Oplus
     ⊕R₁ : ∀ { m : Mode } { Ψ : Context } { Aₘ : Prop m } { Bₘ : Prop m }
@@ -214,6 +225,12 @@ module ADJ.ADJE (U : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_≥
         → Ψ₁ ⊢ Aₘ   →   (Ψ₂ , Bₘ) ⊢ Cₖ
         ----------------------------------
         → ((Ψ₁ ++ Ψ₂) , (Aₘ ⊸ Bₘ)) ⊢ Cₖ
+
+    -- Top - no left rule for top
+    ⊤R : ∀ { m : Mode } { Ψ : Context }
+        ------------------
+        → Ψ ⊢ ⊤ { m } 
+
     -- -- Multiplicative unit
     𝟙R : ∀ { m : Mode } { Ψ : Context }
         → StructRule.W ∈ σ(Ψ)
@@ -245,3 +262,49 @@ module ADJ.ADJE (U : Set) (BotMode : Mode) (_≥_ : Mode → Mode → Set) (_≥
         → k ≥ l         →       (Ψ , Aₖ) ⊢ Cₗ
         ----------------------------------------
         → (Ψ , Up[ m≥k ] Aₖ) ⊢ Cₗ  
+
+    -- For all rules taken from Frank Pfenning's notes on sequent calculus: https://www.cs.cmu.edu/~fp/courses/atp/handouts/ch3-seqcalc.pdf
+    -- Note: Not too sure on allR
+    ∀R : ∀ { m : Mode } { Ψ : Context } { Aₘ : Prop m }
+        → (substitution : Prop m → Prop m)
+        → Ψ ⊢ substitution Aₘ
+        -----------------
+        → Ψ ⊢ ∀[ Aₘ ]
+
+    -- We encode two versions of for all: one where the proposition being eliminated is weakenable and one where it is not.
+    ∀L₁ : ∀ { m k : Mode } { Ψ : Context } { Aₘ : Prop m } { Cₖ : Prop k }
+        → (substitution : Terms → Prop m → Prop m)
+        → (t : Terms)
+        → (Ψ , (substitution t Aₘ)) ⊢ Cₖ
+        --------------------------
+        → (Ψ , ∀[ Aₘ ]) ⊢ Cₖ
+
+    ∀L₂ : ∀ { m k : Mode } { Ψ : Context } { Aₘ : Prop m } { Cₖ : Prop k }
+        → (substitution : Terms → Prop m → Prop m)
+        → (t : Terms)
+        → StructRule.W ∈ rulesOf (modeOf (∀[ Aₘ ]))
+        → ((Ψ , ∀[ Aₘ ]) , (substitution t Aₘ)) ⊢ Cₖ
+        ----------------------------------------------
+        → (Ψ , (∀[ Aₘ ])) ⊢ Cₖ
+        
+  {-
+      Some helper ADJE functions
+  -}
+  ctxt-exchange : ∀ { m } { Ψ₁ Ψ₂ : Context } { C : Prop m } → D ++ Ψ₁ ++ Ψ₂ ++ E ⊢ C → D ++ Ψ₂ ++ Ψ₁ ++ E ⊢ C
+  ctxt-exchange {_} { Ψ₁ } { Ψ₂ } { C } seq = {!   !}
+    where
+      lem₁ : ∀ ( C : Context ) → ∅ ++ C ≡ C
+      lem₁ ∅ = refl
+      lem₁ (C , x) = cong (_, x) (lem₁ C)
+
+      lem₂ : ∀ ( C : Context ) → C ++ ∅ ≡ C
+      lem₂ C = refl
+
+      lem₃ : ((Ψ₁ ++ Ψ₂) ++ ∅) ⊢ C
+      lem₃ rewrite lem₁ Ψ₁ = seq
+
+      lem₄ : ((Ψ₂ ++ Ψ₁) ++ ∅) ⊢ C
+      lem₄ rewrite lem₂ Ψ₂ = {!  !}
+
+
+ 
