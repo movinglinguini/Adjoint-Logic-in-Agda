@@ -80,8 +80,8 @@ module ADJ.ADJE (Atoms : Set) (Terms : Set) (BotMode : Mode) (_≥_ : Mode → M
 
   -- Concatenating contexts
   _++_ : Context → Context → Context
-  ∅ ++ R = R
-  (L , x) ++ R = L ++ (R , x)
+  L ++ ∅ = L
+  L ++ (R , x) = (L ++ R) , x
 
   toHProps : ∀ { m } → List (Prop m) → List (HProp)
   toHProps ∅ = ∅
@@ -169,10 +169,10 @@ module ADJ.ADJE (Atoms : Set) (Terms : Set) (BotMode : Mode) (_≥_ : Mode → M
     -- Writing it in the style of Abramsky's Computational interpretations of linear logic, where we are
     -- exchanging propositions. This is in contrast to Wen Kokke's model of intuitionistic logic, where
     -- she exchanges whole pieces of context.
-    exchange : ∀ { m k l : Mode } { Ψ₁ Ψ₂ : Context } { Aₘ : Prop m } { Bₗ : Prop l } { Cₖ : Prop k }
-        → ((Ψ₁ , Aₘ) ++ (Ψ₂ , Bₗ)) ⊢ Cₖ
+    exchange : ∀ { k : Mode } { Ψ₁ Ψ₂ Ψ₃ Ψ₄ : Context } { Cₖ : Prop k }
+        → (Ψ₁ ++ Ψ₃) ++ (Ψ₂ ++ Ψ₄) ⊢ Cₖ
         ------------------------------------
-        → ((Ψ₁ ,  Bₗ) ++ (Ψ₂ , Aₘ)) ⊢ Cₖ
+        → (Ψ₁ ++ Ψ₂) ++ (Ψ₃ ++ Ψ₄) ⊢ Cₖ
     
     -- -- Oplus
     ⊕R₁ : ∀ { m : Mode } { Ψ : Context } { Aₘ : Prop m } { Bₘ : Prop m }
@@ -287,3 +287,24 @@ module ADJ.ADJE (Atoms : Set) (Terms : Set) (BotMode : Mode) (_≥_ : Mode → M
         ----------------------------------------------
         → (Ψ , (∀[ Aₘ ])) ⊢ Cₖ
         
+  {-
+      Some helper ADJE functions
+  -}
+  ctxt-exchange : ∀ { m } { Ψ₁ Ψ₂ : Context } { C : Prop m } → D ++ Ψ₁ ++ Ψ₂ ++ E ⊢ C → D ++ Ψ₂ ++ Ψ₁ ++ E ⊢ C
+  ctxt-exchange {_} { Ψ₁ } { Ψ₂ } { C } seq = {!   !}
+    where
+      lem₁ : ∀ ( C : Context ) → ∅ ++ C ≡ C
+      lem₁ ∅ = refl
+      lem₁ (C , x) = cong (_, x) (lem₁ C)
+
+      lem₂ : ∀ ( C : Context ) → C ++ ∅ ≡ C
+      lem₂ C = refl
+
+      lem₃ : ((Ψ₁ ++ Ψ₂) ++ ∅) ⊢ C
+      lem₃ rewrite lem₁ Ψ₁ = seq
+
+      lem₄ : ((Ψ₂ ++ Ψ₁) ++ ∅) ⊢ C
+      lem₄ rewrite lem₂ Ψ₂ = {!  !}
+
+
+ 
