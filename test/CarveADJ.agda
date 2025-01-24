@@ -51,6 +51,8 @@ module CarveADJ where
     _⊕_ : Prop → Prop → Prop
     -- With - Using the binary version rather than the n-ary version for simplicity
     _&_ : Prop → Prop → Prop
+    ↑[_][_]_ : Mode → Mode → Prop → Prop
+    ↓[_][_]_ : Mode → Mode → Prop → Prop
 
   PropM = Prop × Mode
   Context : ∀ ( n : ℕ )→ Set
@@ -191,6 +193,31 @@ module CarveADJ where
       → mayConsume Δ ⟨ 𝟙 , m ⟩ Δ'
       → Δ' ⊢ ⟨ C , k ⟩
       → Δ ⊢ ⟨ C , k ⟩
+
+    ↓R : ∀ { n } { Δ₁ Δ₂ Δ : Context n } { m k } { A }
+      → merge Δ₁ Δ₂ Δ
+      → Δ₁ ≥ᶜ m → cWeakenable Δ₂
+      → Δ₁ ⊢ ⟨ A , m ⟩
+      -----------------
+      → Δ ⊢ ⟨ ↓[ m ][ k ] A , m ⟩ 
+
+    ↓L : ∀ { n } { Δ Δ' : Context n } { m k l  } { A C }
+      → mayConsume Δ ⟨ ↓[ m ][ k ] A , m ⟩ Δ'
+      → (⟨ A , m ⟩ ∷ Δ') ⊢ ⟨ C , l ⟩
+      ----------
+      → Δ ⊢ ⟨ C , l ⟩
+
+    ↑R : ∀ { n } { Δ : Context n } { m k  } { A }
+      → Δ ⊢ ⟨ A , k ⟩
+      ----------
+      → Δ ⊢ ⟨ ↑[ m ][ k ] A , k ⟩
+
+    ↑L : ∀ { n } { Δ Δ' : Context n } { m k l  } { A C }
+      → mayConsume Δ ⟨ ↑[ k ][ m ] A , k ⟩ Δ'
+      → k ≥ l
+      → (⟨ A , k ⟩ ∷ Δ') ⊢ ⟨ C , l ⟩
+      ----------------
+      → Δ ⊢ ⟨ C , l ⟩ 
 
   ∙-comm : ∀ { M1 M2 M } → M1 ∙ M2 ⇒ M → M2 ∙ M1 ⇒ M
   ∙-comm u∙u = u∙u 
