@@ -1,3 +1,4 @@
+open import Data.String
 open import Data.List using (List; _++_; any) renaming (_∷_ to _,_; _∷ʳ_ to _,′_; [] to ∅)
 open import Data.List.Relation.Binary.Sublist.Setoid using (_⊇_)
 open import Relation.Binary.Core using (Rel)
@@ -10,6 +11,7 @@ module ADJ.Mode where
 
   record Mode : Set where
     field
+      name : String
       structRules : List StructRule
 
   rulesOf : Mode → List StructRule
@@ -18,14 +20,12 @@ module ADJ.Mode where
   -- some example modes
   private
     Linear : Mode
-    Linear = record { structRules = ∅ }
+    Linear = record { structRules = ∅ ; name = "Linear" }
 
     Unrestricted : Mode
-    Unrestricted = record { structRules = StructRule.W , StructRule.C , ∅ }
+    Unrestricted = record { structRules = StructRule.W , StructRule.C , ∅ ; name = "Unrestricted" }
 
   open Data.List public renaming (_∷_ to _,_; _∷ʳ_ to _,′_; [] to ∅)
-
-
 
 
  
