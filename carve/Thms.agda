@@ -8,11 +8,6 @@ module Thms where
   impl_to_expl : Δ ⊢ⁱ ⟨ C , m ⟩ → Δ ⊢ᵉ ⟨ C , m ⟩
   impl_to_expl D1 = {!   !}
 
-  {---------
-    Admissibility of exchange
-  ----------}
-  exch : {!   !}
-
   {-
     Lemma: Admissibility of weakening
   -}
