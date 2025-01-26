@@ -31,9 +31,11 @@ module Thms where
   weak-admit (𝟙L MC D) mWeak with MC
   ... | yea U = 𝟙L (yea (S U)) (weak-admit D mWeak) 
   ... | nay U mC = 𝟙L (nay (S U) mC) (weak-admit D mWeak)
-  weak-admit (↓R M Δ≥k cW D) mWeak = {!   !}
-  weak-admit (↓L x D) mWeak = {!   !}
-  weak-admit (↑R D) mWeak = {!   !}
+  weak-admit (↓R M Δ≥k cW D) mWeak = ↓R {!   !} {!   !} {!   !} (weak-admit D {!   !})
+  weak-admit (↓L MC D) mWeak with MC
+  ... | yea U = ↓L (yea {! S U  !}) (weak-admit D mWeak) 
+  ... | nay U mC = ↓L (nay (S U) mC) {!   !} -- I think I need to be able to exchange here?
+  weak-admit (↑R D) mWeak = ↑R (weak-admit D mWeak)
   weak-admit (↑L x x₁ D) mWeak = {!   !}
 
   expl_to_impl : Δ ⊢ᵉ ⟨ C , m ⟩ → Δ ⊢ⁱ ⟨ C , m ⟩
@@ -68,5 +70,5 @@ module Thms where
     merge/getid M1 E1 ← merge-getid _ =
       ↓R M1 G1 (exh_to_cWeakenable E1) (expl_to_impl D1)
   expl_to_impl (↓L G1 D1) = ↓L (yea G1) (expl_to_impl D1)
-  expl_to_impl (↑R D1) = ↑R (expl_to_impl D1)       
+  expl_to_impl (↑R D1) = ↑R (expl_to_impl D1)        
   expl_to_impl (↑L U1 G1 D1) = ↑L (yea U1) G1 (expl_to_impl D1)       
