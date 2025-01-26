@@ -14,7 +14,8 @@ module Thms where
       merge/assoc M4 _ ← merge-assoc M2 M1 | merge/assoc M5 M6 ← merge-assoc M3 (merge-comm M1) with
         refl ← merge-cancl M4 M1 | refl ← merge-cancl M5 (merge-comm M1) with
           refl ← merge-cancl M2 (merge-comm M6) =
-            cut M2 (merge-comm M3) M1 G1 {!   !} G2 (exh_to_cContractable E2) (expl_to_impl D1) (expl_to_impl D2) -- TODO
+            cut M2 (merge-comm M3) M1 G1 {!   !} G2 (exh_to_cContractable E2) (expl_to_impl D1) (expl_to_impl D2)
+            -- TODO: for this to work: need to define ≥ only on non-irrelevant modes?
   expl_to_impl (weak U1 W1 D1) = {!   !} -- TODO: prove admissibility of weakening as lemma
   expl_to_impl (contr U1 C1 D1) = {!   !} -- TODO: prove admissibility of contraction as lemma
   expl_to_impl (⊕R₁ D1) = ⊕R₁ (expl_to_impl D1)
