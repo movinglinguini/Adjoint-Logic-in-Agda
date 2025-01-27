@@ -98,3 +98,12 @@ module Contexts where
   merge-getid (⟨ A , m ⟩ ∷ Δ) with
     merge/getid M1 E1 ← merge-getid Δ
       | ∙/getid M2 H1 ← ∙-getid m = merge/getid (mg/c M1 M2) (exh/c E1 H1)
+  
+  {------
+    Properties of cWeakenable
+  -------}
+  cWeaken-to-mWeaken : cWeakenable (⟨ A , m ⟩ ∷ Δ) → mWeakenable m
+  cWeaken-to-mWeaken (weak/c cW x) = x
+
+  cWeaken-shrink : cWeakenable (⟨ A , m ⟩ ∷ Δ) → cWeakenable Δ
+  cWeaken-shrink (weak/c cW x) = cW

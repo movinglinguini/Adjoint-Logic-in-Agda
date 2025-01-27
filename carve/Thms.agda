@@ -10,29 +10,53 @@ module Thms where
   impl_to_expl : Δ ⊢ⁱ ⟨ C , m ⟩ → Δ ⊢ᵉ ⟨ C , m ⟩
   impl_to_expl D1 = {!   !}
 
-  {-
+  {--------------------------------------
     Lemma: Admissibility of exchange
-  -}
+  ----------------------------------------}
   ctxt-exch : ∀ { n } (i : Fin n) → Context (suc n) → Context (suc n)
   ctxt-exch zero (A ∷ B ∷ Δ) = B ∷ A ∷ Δ
   ctxt-exch (suc i) (A ∷ Δ) = A ∷ ctxt-exch i Δ
 
   exch-weak : ∀ { n } { i : Fin n } { Δ : Context (suc n) } → cWeakenable Δ → cWeakenable (ctxt-exch i Δ)
-  exch-weak {_} { i } { Δ = Δ } (weak/c cW mWeak) with ctxt-exch i Δ
-  ... | ⟨ A , m ⟩ ∷ Δ' = {!   !} 
+  exch-weak (weak/c cW x) = {!   !}
 
   exch-update : ∀ { n } { i : Fin n } { Δ Δ' : Context (suc n) } 
                 → update Δ ⟨ A , m ⟩ ⟨ B , l ⟩ Δ' 
                 → update (ctxt-exch i Δ) ⟨ A , m ⟩ ⟨ B , l ⟩ (ctxt-exch i Δ')
-  exch-update N = {!   !}
-  exch-update (S U) = {!   !}
-  
-  exch-admit : ∀ { q } ( i : Fin q ) { Δ : Context (suc q) } → Δ ⊢ⁱ ⟨ C , l ⟩ → ctxt-exch i Δ ⊢ⁱ ⟨ C , l ⟩
-  exch-admit i D = {!   !}
+  exch-update {i = i} {Δ = Δ} U = {!   !}
+
+  exch-consume : ∀ { n } { i : Fin n } { Δ Δ' : Context (suc n) } 
+                  → mayConsume Δ ⟨ A , m ⟩ Δ'
+                  → mayConsume (ctxt-exch i Δ) ⟨ A , m ⟩ (ctxt-exch i Δ')
+  exch-consume (yea U) = yea (exch-update U)
+  exch-consume (nay U mC) = nay (exch-update U) mC
+
+  exch-admit : ∀ { q } ( i : Fin q ) { Δ : Context (suc q) } → Δ ⊢ⁱ ⟨ C , k ⟩ → ctxt-exch i Δ ⊢ⁱ ⟨ C , k ⟩
+  exch-admit i (id U cW) = id (exch-update U) (exch-weak cW)
+  exch-admit i (cut x x₁ x₂ x₃ x₄ x₅ x₆ D D₁) = {!   !}
+  exch-admit i (⊕R₁ D) = ⊕R₁ (exch-admit i D) 
+  exch-admit i (⊕R₂ D) = ⊕R₂ (exch-admit i D)
+  exch-admit i (⊕L MC D1 D2) with MC
+  ... | yea U = ⊕L (yea (exch-update U)) (exch-admit (suc i) D1) (exch-admit (suc i) D2)
+  ... | nay U mC = ⊕L (nay (exch-update U) mC) (exch-admit (suc i) D1) (exch-admit (suc i) D2)
+  exch-admit i (&R D D₁) = &R (exch-admit i D) (exch-admit i D₁)
+  exch-admit i (&L₁ x D) = {!   !}
+  exch-admit i (&L₂ x D) = {!   !}
+  exch-admit i (⊗R x x₁ x₂ x₃ D D₁) = {!   !}
+  exch-admit i (⊗L x D) = {!   !}
+  exch-admit i (⊸R D) = {!   !}
+  exch-admit i (⊸L x x₁ x₂ x₃ x₄ x₅ x₆ x₇ D D₁) = {!   !}
+  exch-admit i (𝟙R cW) = 𝟙R (exch-weak cW)
+  exch-admit i (𝟙L x D) = {!   !}
+  exch-admit i (↓R x x₁ x₂ D) = {!   !}
+  exch-admit i (↓L MC D) with MC
+  ... | yea U = ↓L (yea (exch-update U)) (exch-admit (suc i) D)
+  ... | nay U mC = ↓L (nay (exch-update U) mC) (exch-admit (suc i) D)
+  exch-admit i (↑R D) = ↑R (exch-admit i D)
+  exch-admit i (↑L x x₁ D) = {!   !}
 
   exch₀ : (⟨ A , m ⟩ ∷ ⟨ B , l ⟩ ∷ Δ) ⊢ⁱ ⟨ C , k ⟩ → (⟨ B , l ⟩ ∷ ⟨ A , m ⟩ ∷ Δ) ⊢ⁱ ⟨ C , k ⟩
-  exch₀ D = {!   !}
-
+  exch₀ D = exch-admit zero D
 
   {---------------------------------------
     Lemma: Admissibility of weakening
@@ -93,7 +117,7 @@ module Thms where
   expl_to_impl (&R D1 D2) = &R (expl_to_impl D1) (expl_to_impl D2)
   expl_to_impl (&L₁ U1 D1) = &L₁ (yea U1) (expl_to_impl D1)
   expl_to_impl (&L₂ U1 D1) = &L₂ (yea U1) (expl_to_impl D1)    
-  expl_to_impl (⊗R M1 D1 D2) with
+  expl_to_impl (⊗R M1 D1 D2) with 
     merge/getid M2 E1 ← merge-getid _ | merge/getid M3 E2 ← merge-getid _ with
       merge/assoc M4 _ ← merge-assoc M2 M1 | merge/assoc M5 M6 ← merge-assoc M3 (merge-comm M1) with
         refl ← merge-cancl M4 M1 | refl ← merge-cancl M5 (merge-comm M1) with
@@ -109,5 +133,5 @@ module Thms where
   --   merge/getid M1 E1 ← merge-getid _ =
   --     ↓R M1 G1 (exh_to_cWeakenable E1) (expl_to_impl D1) 
   expl_to_impl (↓L G1 D1) = ↓L (yea G1) (expl_to_impl D1)
-  expl_to_impl (↑R D1) = ↑R (expl_to_impl D1)                     
-  expl_to_impl (↑L U1 G1 D1) = ↑L (yea U1) G1 (expl_to_impl D1)           
+  expl_to_impl (↑R D1) = ↑R (expl_to_impl D1)                           
+  expl_to_impl (↑L U1 G1 D1) = ↑L (yea U1) G1 (expl_to_impl D1)            
