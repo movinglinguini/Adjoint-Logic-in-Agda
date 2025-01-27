@@ -81,10 +81,11 @@ module Adjoint where
       → Δ ⊢ⁱ ⟨ C , k ⟩
 
     ↓R : merge Δ₁ Δ₂ Δ
-      → Δ₁ ≥ᶜ m → cWeakenable Δ₂
+      → Δ₁ ≥ᶜ m 
+      → cWeakenable Δ₂
       → Δ₁ ⊢ⁱ ⟨ A , m ⟩
       ----------------------------------------------------------
-      → Δ ⊢ⁱ ⟨ ↓[ m ][ k ] A , m ⟩
+      → Δ ⊢ⁱ ⟨ ↓[ m ][ k ] A , k ⟩
 
     ↓L : mayConsume Δ ⟨ ↓[ m ][ k ] A , m ⟩ Δ'
       → (⟨ A , m ⟩ ∷ Δ') ⊢ⁱ ⟨ C , l ⟩

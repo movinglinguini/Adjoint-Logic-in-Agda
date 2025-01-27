@@ -28,32 +28,15 @@ module Thms where
   exch-update (S U) = {!   !}
   
   exch-admit : ∀ { q } ( i : Fin q ) { Δ : Context (suc q) } → Δ ⊢ⁱ ⟨ C , l ⟩ → ctxt-exch i Δ ⊢ⁱ ⟨ C , l ⟩
-  exch-admit i {Δ = Δ} (id U cW) = id (exch-update U) (exch-weak {_} {i} cW)
-  exch-admit i (cut x x₁ x₂ x₃ x₄ x₅ x₆ D D₁) = {!   !}
-  exch-admit i (⊕R₁ D) = {!   !}
-  exch-admit i (⊕R₂ D) = {!   !}
-  exch-admit i (⊕L x D D₁) = {!   !}
-  exch-admit i (&R D D₁) = {!   !}
-  exch-admit i (&L₁ x D) = {!   !}
-  exch-admit i (&L₂ x D) = {!   !}
-  exch-admit i (⊗R x x₁ x₂ x₃ D D₁) = {!   !}
-  exch-admit i (⊗L x D) = {!   !}
-  exch-admit i (⊸R D) = {!   !}
-  exch-admit i (⊸L x x₁ x₂ x₃ x₄ x₅ x₆ x₇ D D₁) = {!   !}
-  exch-admit i (𝟙R x) = {!   !}
-  exch-admit i (𝟙L x D) = {!   !}
-  exch-admit i (↓R x x₁ x₂ D) = {!   !}
-  exch-admit i (↓L x D) = {!   !}
-  exch-admit i (↑R D) = {!   !}
-  exch-admit i (↑L x x₁ D) = {!   !}
+  exch-admit i D = {!   !}
 
   exch₀ : (⟨ A , m ⟩ ∷ ⟨ B , l ⟩ ∷ Δ) ⊢ⁱ ⟨ C , k ⟩ → (⟨ B , l ⟩ ∷ ⟨ A , m ⟩ ∷ Δ) ⊢ⁱ ⟨ C , k ⟩
   exch₀ D = {!   !}
 
 
-  {-
+  {---------------------------------------
     Lemma: Admissibility of weakening
-  -}
+  ----------------------------------------}
   weak-admit : Δ ⊢ⁱ ⟨ C , k ⟩ → mWeakenable m → (⟨ A , m ⟩ ∷ Δ) ⊢ⁱ ⟨ C , k ⟩
   weak-admit (id U CW) mWeak = id (S U) (weak/c CW mWeak)
   --- back to this with pen and paper
@@ -72,10 +55,14 @@ module Thms where
   ... | nay U mC = &L₂ (nay (S U) mC) (exch₀ (weak-admit D mWeak))
   weak-admit (⊗R M12 M23 M C D1 D2) mWeak = {!   !}
   weak-admit (⊗L MC D) mWeak with MC
-  ... | yea U = ⊗L {!   !} {!   !} 
-  ... | nay U mC = {!   !}
+  ... | yea U = ⊗L (yea (S U)) (exch-admit (Fin.suc zero) (exch₀ (weak-admit D mWeak)))
+  ... | nay U mC = ⊗L (nay (S U) mC) (exch-admit (Fin.suc zero) (exch₀ (weak-admit D mWeak)))
   weak-admit (⊸R D) mWeak = ⊸R (exch₀ (weak-admit D mWeak))
-  weak-admit (⊸L x x₁ x₂ x₃ x₄ x₅ x₆ x₇ D D₁) mWeak = {!   !}
+  weak-admit (⊸L M12 M23 M mC12 mC23 Δ₁≥m₁ Δ₂≥m₁ cCΔ₂ D1 D2) mWeak with mC12 | mC23
+  ... | yea U12 | yea U23 = {!   !}
+  ... | yea U12 | nay U23 x₂ = {!   !}
+  ... | nay U12 x₁ | yea U23 = {!   !}
+  ... | nay U12 x₁ | nay U23 x₃ = {!   !}
   weak-admit (𝟙R x) mWeak = 𝟙R (weak/c x mWeak)
   weak-admit (𝟙L MC D) mWeak with MC
   ... | yea U = 𝟙L (yea (S U)) (weak-admit D mWeak) 
@@ -98,7 +85,7 @@ module Thms where
           refl ← merge-cancl M2 (merge-comm M6) =
             cut M2 (merge-comm M3) M1 G1 {!   !} G2 (exh_to_cContractable E2) (expl_to_impl D1) (expl_to_impl D2)
             -- TODO: for this to work: need to define ≥ only on non-irrelevant modes?
-  expl_to_impl (weak U1 W1 D1) = {!   !} -- TODO: prove admissibility of weakening as lemma
+  expl_to_impl (weak U1 W1 D1) = {!   !} --TODO: prove admissibility of weakening as lemma
   expl_to_impl (contr U1 C1 D1) = {!   !} -- TODO: prove admissibility of contraction as lemma
   expl_to_impl (⊕R₁ D1) = ⊕R₁ (expl_to_impl D1)
   expl_to_impl (⊕R₂ D1) = ⊕R₂ (expl_to_impl D1)
@@ -117,9 +104,10 @@ module Thms where
   expl_to_impl (⊸L M1 U1 G1 D1 D2) = {!   !} -- will need associativity of ⋈, dist. of update over ⋈
   expl_to_impl (𝟙R W1) = 𝟙R W1
   expl_to_impl (𝟙L U1 D1) = 𝟙L (yea U1) (expl_to_impl D1)
-  expl_to_impl (↓R G1 D1) with
-    merge/getid M1 E1 ← merge-getid _ =
-      ↓R M1 G1 (exh_to_cWeakenable E1) (expl_to_impl D1)
+  expl_to_impl (↓R G1 D1) = {!   !}
+  -- with
+  --   merge/getid M1 E1 ← merge-getid _ =
+  --     ↓R M1 G1 (exh_to_cWeakenable E1) (expl_to_impl D1) 
   expl_to_impl (↓L G1 D1) = ↓L (yea G1) (expl_to_impl D1)
-  expl_to_impl (↑R D1) = ↑R (expl_to_impl D1)                 
-  expl_to_impl (↑L U1 G1 D1) = ↑L (yea U1) G1 (expl_to_impl D1)        
+  expl_to_impl (↑R D1) = ↑R (expl_to_impl D1)                     
+  expl_to_impl (↑L U1 G1 D1) = ↑L (yea U1) G1 (expl_to_impl D1)           
