@@ -2,10 +2,10 @@ open import Data.Vec
 open import Data.Nat hiding (_≥_)
 open import Data.Product renaming (_,_ to ⟨_,_⟩)
 open import Relation.Binary.PropositionalEquality
-open import Modes
-open import Props
+open import Logic.Core.Modes
 
-module Contexts where
+module Logic.Core.Contexts (Atom : Set) where
+  open import Logic.Core.Props Atom
 
   Context : ∀ ( n : ℕ ) → Set
   Context n = Vec (Prop × Mode) n

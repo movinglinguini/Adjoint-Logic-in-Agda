@@ -4,7 +4,7 @@ open import Data.Nat hiding (_≥_)
 open import Data.Product renaming (_,_ to ⟨_,_⟩)
 open import Relation.Binary.PropositionalEquality
 
-module Modes where
+module Logic.Core.Modes where
 
   data Mode : Set where
     Linear : Mode

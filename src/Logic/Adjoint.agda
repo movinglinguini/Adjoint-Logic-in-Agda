@@ -1,11 +1,11 @@
 open import Data.Vec
 open import Data.Product renaming (_,_ to ⟨_,_⟩)
 
-module Adjoint where
+module Logic.Adjoint (Atom : Set) where
 
-  open import Props public
-  open import Modes public
-  open import Contexts public
+  open import Logic.Core.Props Atom public
+  open import Logic.Core.Modes public
+  open import Logic.Core.Contexts Atom public
 
   data _⊢ⁱ_ : Context n → (Prop × Mode) → Set where
 

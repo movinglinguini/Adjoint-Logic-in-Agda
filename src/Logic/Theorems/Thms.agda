@@ -3,9 +3,13 @@ open import Data.Fin
 open import Data.Nat
 open import Data.Product renaming (_,_ to ⟨_,_⟩)
 open import Relation.Binary.PropositionalEquality
-open import Adjoint
 
-module Thms where
+module Logic.Theorems.Thms where
+
+  data Atom : Set where
+    unit : Atom
+
+  open import Logic.Adjoint Atom
 
   impl_to_expl : Δ ⊢ⁱ ⟨ C , m ⟩ → Δ ⊢ᵉ ⟨ C , m ⟩
   impl_to_expl D1 = {!   !}

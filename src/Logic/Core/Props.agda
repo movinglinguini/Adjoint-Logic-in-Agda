@@ -1,10 +1,7 @@
-open import Modes
+open import Logic.Core.Modes
 
-module Props where
-
-  data Atom : Set where
-    unit : Atom
-
+module Logic.Core.Props (Atom : Set) where
+  
   data Prop : Set where
     -- An arbitrary proposition
     `_  : (A : Atom) → Prop
