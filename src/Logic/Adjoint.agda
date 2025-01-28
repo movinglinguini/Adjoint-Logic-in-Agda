@@ -85,7 +85,7 @@ module Logic.Adjoint (Atom : Set) where
       → cWeakenable Δ₂
       → Δ₁ ⊢ⁱ ⟨ A , m ⟩
       ----------------------------------------------------------
-      → Δ ⊢ⁱ ⟨ ↓[ m ][ k ] A , k ⟩
+      → Δ ⊢ⁱ ⟨ ↓[ m ][ k ] A , m ⟩
 
     ↓L : mayConsume Δ ⟨ ↓[ m ][ k ] A , m ⟩ Δ'
       → (⟨ A , m ⟩ ∷ Δ') ⊢ⁱ ⟨ C , l ⟩

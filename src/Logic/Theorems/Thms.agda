@@ -9,8 +9,8 @@ module Logic.Theorems.Thms where
   data Atom : Set where
     unit : Atom
 
-  open import Logic.Theorems.Lemmas Atom
   open import Logic.Adjoint Atom
+  open import Logic.Theorems.Lemmas Atom
 
   impl_to_expl : Δ ⊢ⁱ ⟨ C , m ⟩ → Δ ⊢ᵉ ⟨ C , m ⟩
   impl_to_expl (id U1 W1) = id U1 {!   !}
@@ -67,10 +67,9 @@ module Logic.Theorems.Thms where
   expl_to_impl (⊸L M1 U1 G1 D1 D2) = {!   !} -- will need associativity of ⋈, dist. of update over ⋈
   expl_to_impl (𝟙R W1) = 𝟙R W1
   expl_to_impl (𝟙L U1 D1) = 𝟙L (yea U1) (expl_to_impl D1)
-  expl_to_impl (↓R G1 D1) = {!   !}
-  -- with
-  --   merge/getid M1 E1 ← merge-getid _ =
-  --     ↓R M1 G1 (exh_to_cWeakenable E1) (expl_to_impl D1) 
+  expl_to_impl (↓R G1 D1) with
+    merge/getid M1 E1 ← merge-getid _ =
+      ↓R M1 G1 (exh_to_cWeakenable E1) (expl_to_impl D1) 
   expl_to_impl (↓L G1 D1) = ↓L (yea G1) (expl_to_impl D1)
   expl_to_impl (↑R D1) = ↑R (expl_to_impl D1)                           
   expl_to_impl (↑L U1 G1 D1) = ↑L (yea U1) G1 (expl_to_impl D1)            
