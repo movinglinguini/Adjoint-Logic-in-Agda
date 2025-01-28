@@ -10,7 +10,7 @@ open import Relation.Binary.PropositionalEquality
 module Logic.Theorems.Lemmas (Atom : Set) where
   
   open import Logic.Adjoint Atom
-
+  
   {--------------------------------------
   Lemma: Admissibility of exchange
   ----------------------------------------}
