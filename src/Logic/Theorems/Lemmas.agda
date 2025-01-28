@@ -24,6 +24,16 @@ module Logic.Theorems.Lemmas (Atom : Set) where
   exch-contr : ∀ { n } { i : Fin n } { Δ : Context (suc n) } → cContractable Δ → cContractable (ctxt-exch i Δ)
   exch-contr (cont/c cC x) = {!   !}
 
+  exch-merge : ∀ { n } ( i : Fin n ) { Δ₁ Δ₂ Δ : Context (suc n) }
+    → merge Δ₁ Δ₂ Δ 
+    → merge (ctxt-exch i Δ₁) (ctxt-exch i Δ₂) (ctxt-exch i Δ)
+  exch-merge i (mg/c (mg/c M x₁) x) = {!   !}
+
+  exch-≥ᶜ : ∀ { n } { i : Fin n } { Δ : Context (suc n) }
+    → Δ ≥ᶜ m
+    → (ctxt-exch i Δ) ≥ᶜ m
+  exch-≥ᶜ Δ≥m = {!   !}
+
   exch-update : ∀ { n } { i : Fin n } { Δ Δ' : Context (suc n) } 
                 → update Δ ⟨ A , m ⟩ ⟨ B , l ⟩ Δ' 
                 → update (ctxt-exch i Δ) ⟨ A , m ⟩ ⟨ B , l ⟩ (ctxt-exch i Δ')
@@ -38,7 +48,7 @@ module Logic.Theorems.Lemmas (Atom : Set) where
   exch-admit : ∀ { q } ( i : Fin q ) { Δ : Context (suc q) } → Δ ⊢ⁱ ⟨ C , k ⟩ → ctxt-exch i Δ ⊢ⁱ ⟨ C , k ⟩
   exch-admit i (id U cW) = id (exch-update U) (exch-weak cW)
   exch-admit i (cut M12 M23 M Δ₁≥m Δ₂≥m m≥k cCΔ₂ D1 D2) 
-    = cut {!   !} {!   !} {!   !} {!   !} {!   !} m≥k cCΔ₂ {!   !} (exch-admit (suc i) D2) 
+    = cut (exch-merge i M12) (exch-merge i M23) (exch-merge i M) (exch-≥ᶜ Δ₁≥m) (exch-≥ᶜ Δ₂≥m) m≥k (exch-contr cCΔ₂) (exch-admit i D1) (exch-admit (suc i) D2) 
   exch-admit i (⊕R₁ D) = ⊕R₁ (exch-admit i D) 
   exch-admit i (⊕R₂ D) = ⊕R₂ (exch-admit i D)
   exch-admit i (⊕L MC D1 D2) with MC
@@ -51,10 +61,17 @@ module Logic.Theorems.Lemmas (Atom : Set) where
   exch-admit i (&L₂ MC D) with MC
   ... | yea U = &L₂ (yea (exch-update U)) (exch-admit (suc i) D)
   ... | nay U mC = &L₂ (nay (exch-update U) mC) (exch-admit (suc i) D)
-  exch-admit i (⊗R x x₁ x₂ x₃ D D₁) = {!   !}
-  exch-admit i (⊗L MC D) = {!   !}
+  exch-admit i (⊗R M12 M23 M C D1 D2) 
+    = ⊗R (exch-merge i M12) (exch-merge i M23) (exch-merge i M) (exch-contr C) (exch-admit i D1) (exch-admit i D2) 
+  exch-admit i (⊗L MC D) with MC
+  ... | yea U = ⊗L (yea (exch-update U)) (exch-admit (suc (suc i)) D)
+  ... | nay U mC = ⊗L (nay (exch-update U) mC) (exch-admit (suc (suc i)) D)
   exch-admit i (⊸R D) = ⊸R (exch-admit (suc i) D)
-  exch-admit i (⊸L x x₁ x₂ x₃ x₄ x₅ x₆ x₇ D D₁) = {!   !}
+  exch-admit i (⊸L M12 M23 M mC12 mC23 Δ₁≥m₁ Δ₂≥m₁ cCΔ₂ D1 D2) with mC12 | mC23
+  ... | yea U12 | yea U23 = {!   !}
+  ... | yea U12 | nay U23 x₂ = {!   !}
+  ... | nay U12 x₁ | yea U23 = {!   !}
+  ... | nay U12 x₁ | nay U23 x₃ = {!   !}
   exch-admit i (𝟙R cW) = 𝟙R (exch-weak cW)
   exch-admit i (𝟙L MC D) with MC
   ... | yea U = 𝟙L (yea (exch-update U)) (exch-admit i D)
@@ -64,14 +81,20 @@ module Logic.Theorems.Lemmas (Atom : Set) where
   ... | yea U = ↓L (yea (exch-update U)) (exch-admit (suc i) D)
   ... | nay U mC = ↓L (nay (exch-update U) mC) (exch-admit (suc i) D)
   exch-admit i (↑R D) = ↑R (exch-admit i D)
-  exch-admit i (↑L x x₁ D) = {!   !}
-
+  exch-admit i (↑L MC k₁≥k D) with MC
+  ... | yea U = ↑L (yea (exch-update U)) k₁≥k (exch-admit (suc i) D)
+  ... | nay U mC = ↑L (nay (exch-update U) mC) k₁≥k (exch-admit (suc i) D)
+  
   exch₀ : (⟨ A , m ⟩ ∷ ⟨ B , l ⟩ ∷ Δ) ⊢ⁱ ⟨ C , k ⟩ → (⟨ B , l ⟩ ∷ ⟨ A , m ⟩ ∷ Δ) ⊢ⁱ ⟨ C , k ⟩
   exch₀ D = exch-admit zero D
 
   {---------------------------------------
   Lemma: Admissibility of weakening
   ----------------------------------------}
+  ctxt-weak : ∀ { m : Mode } 
+    → Context n → (Prop × Mode) → mWeakenable m → Context (suc n) 
+  ctxt-weak Δ A mW = A ∷ Δ
+
   weak-admit : Δ ⊢ⁱ ⟨ C , k ⟩ → mWeakenable m → (⟨ A , m ⟩ ∷ Δ) ⊢ⁱ ⟨ C , k ⟩
   weak-admit (id U CW) mWeak = id (S U) (weak/c CW mWeak)
   --- back to this with pen and paper
@@ -88,7 +111,11 @@ module Logic.Theorems.Lemmas (Atom : Set) where
   weak-admit (&L₂ MC D) mWeak with MC
   ... | yea U = &L₂ (yea (S U)) (exch₀ (weak-admit D mWeak))
   ... | nay U mC = &L₂ (nay (S U) mC) (exch₀ (weak-admit D mWeak))
-  weak-admit (⊗R M12 M23 M C D1 D2) mWeak = {!   !}
+  weak-admit (⊗R M12 M23 M C D1 D2) mWeak 
+    = ⊗R ({!   !}) 
+            ({!   !}) 
+              ({!   !}) 
+              ({!   !}) (weak-admit D1 mWeak) (weak-admit D2 mWeak) 
   weak-admit (⊗L MC D) mWeak with MC
   ... | yea U = ⊗L (yea (S U)) (exch-admit (Fin.suc zero) (exch₀ (weak-admit D mWeak)))
   ... | nay U mC = ⊗L (nay (S U) mC) (exch-admit (Fin.suc zero) (exch₀ (weak-admit D mWeak)))
@@ -102,11 +129,12 @@ module Logic.Theorems.Lemmas (Atom : Set) where
   weak-admit (𝟙L MC D) mWeak with MC
   ... | yea U = 𝟙L (yea (S U)) (weak-admit D mWeak) 
   ... | nay U mC = 𝟙L (nay (S U) mC) (weak-admit D mWeak)
-  weak-admit (↓R M Δ≥k cW D) mWeak = {!   !}
+  weak-admit (↓R M Δ≥k cW D) mWeak 
+    = ↓R ({!   !}) {!   !} ({!   !}) (weak-admit D mWeak)
   weak-admit (↓L MC D) mWeak with MC
   ... | yea U = ↓L (yea (S U)) (exch₀ (weak-admit D mWeak)) 
   ... | nay U mC = ↓L (nay (S U) mC) (exch₀ (weak-admit D mWeak))
   weak-admit (↑R D) mWeak = ↑R (weak-admit D mWeak)
   weak-admit (↑L MC x D) mWeak with MC
-  ... | yea U = ↑L (yea (S U)) x (exch₀ (weak-admit D mWeak))  
-  ... | nay U mC = ↑L (nay (S U) mC) x (exch₀ (weak-admit D mWeak))
+  ... | yea U = ↑L (yea (S U)) x (exch₀ (weak-admit D mWeak))         
+  ... | nay U mC = ↑L (nay (S U) mC) x (exch₀ (weak-admit D mWeak))   
