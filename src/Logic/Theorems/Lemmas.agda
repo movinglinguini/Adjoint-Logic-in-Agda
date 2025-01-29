@@ -129,7 +129,7 @@ module Logic.Theorems.Lemmas (Atom : Set) where
   ... | nay U mC = 𝟙L (nay (S U) mC) (weak-admit D mWeak)
   weak-admit (↓R M Δ≥k cW D) mWeak with mWeak
   ... | mweak/u = ↓R (mg/c M u∙u) (S Δ≥k u≥m) (weak/c cW mweak/u) (weak-admit D mweak/u)
-  ... | mweak/i = ↓R {!   !} ({!   !}) {!   !} (weak-admit D mweak/i)
+  ... | mweak/i = ↓R (mg/c M i∙i) (S Δ≥k i≥m) (weak/c cW mweak/i) (weak-admit D mweak/i)
   weak-admit (↓L MC D) mWeak with MC
   ... | yea U = ↓L (yea (S U)) (exch₀ (weak-admit D mWeak)) 
   ... | nay U mC = ↓L (nay (S U) mC) (exch₀ (weak-admit D mWeak))

@@ -28,8 +28,8 @@ module Logic.Core.Modes where
 
   data _≥_ : Mode → Mode → Set where
     u≥m : Unrestricted ≥ m
-    m≥i : m ≥ Irrelevant
     l≥l : Linear ≥ Linear
+    i≥m : Irrelevant ≥ m
 
   data _∙_⇒_ : Mode → Mode → Mode → Set where
     u∙u : Unrestricted ∙ Unrestricted ⇒ Unrestricted
@@ -42,17 +42,18 @@ module Logic.Core.Modes where
   ----------------------------------------------------------
 
   ≥-refl : m ≥ m
-  ≥-refl {Linear} = l≥l
-  ≥-refl {Unrestricted} = u≥m
-  ≥-refl {Irrelevant} = m≥i
+  ≥-refl { Unrestricted } = u≥m
+  ≥-refl { Linear } = l≥l
+  ≥-refl { Irrelevant } = i≥m
 
   ≥-trans : m₁ ≥ m₂ → m₂ ≥ m₃ → m₁ ≥ m₃
   ≥-trans u≥m u≥m = u≥m
-  ≥-trans u≥m m≥i = u≥m
   ≥-trans u≥m l≥l = u≥m
-  ≥-trans m≥i m≥i = m≥i
-  ≥-trans l≥l m≥i = m≥i
+  ≥-trans u≥m i≥m = u≥m
   ≥-trans l≥l l≥l = l≥l
+  ≥-trans i≥m u≥m = i≥m
+  ≥-trans i≥m l≥l = i≥m
+  ≥-trans i≥m i≥m = i≥m
 
   ----------------------------------------------------------
   -- Properties of •
@@ -109,4 +110,4 @@ module Logic.Core.Modes where
 
   harmless_to_mContractable : harmless m → mContractable m
   harmless_to_mContractable harmless/u = mcontract/u
-  harmless_to_mContractable harmless/i = mcontract/i
+  harmless_to_mContractable harmless/i = mcontract/i  
