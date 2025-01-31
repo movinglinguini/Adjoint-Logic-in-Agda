@@ -68,10 +68,10 @@ module Logic.Theorems.Lemmas (Atom : Set) where
   ... | nay U mC = ⊗L (nay (exch-update U) mC) (exch-admit (suc (suc i)) D)
   exch-admit i (⊸R D) = ⊸R (exch-admit (suc i) D)
   exch-admit i (⊸L M12 M23 M mC12 mC23 Δ₁≥m₁ Δ₂≥m₁ cCΔ₂ D1 D2) with mC12 | mC23
-  ... | yea U12 | yea U23 = ⊸L {!   !} {!   !} {!   !} {!   !} {!   !} {!   !} {!   !} {!   !} (exch-admit i D1) (exch-admit (suc i) D2)
-  ... | yea U12 | nay U23 x₂ = {!   !}
-  ... | nay U12 x₁ | yea U23 = {!   !}
-  ... | nay U12 x₁ | nay U23 x₃ = {!   !}
+  ... | yea U12 | yea U23 = ⊸L (exch-merge i M12) (exch-merge i M23) (exch-merge i M) (yea (exch-update U12)) (yea (exch-update U23)) (exch-≥ᶜ Δ₁≥m₁) (exch-≥ᶜ Δ₂≥m₁) (exch-contr cCΔ₂) (exch-admit i D1) (exch-admit (suc i) D2)
+  ... | yea U12 | nay U23 mC = ⊸L (exch-merge i M12) (exch-merge i M23) (exch-merge i M) (yea (exch-update U12)) (nay (exch-update U23) mC) (exch-≥ᶜ Δ₁≥m₁) (exch-≥ᶜ Δ₂≥m₁) (exch-contr cCΔ₂) (exch-admit i D1) (exch-admit (suc i) D2)
+  ... | nay U12 mC | yea U23 = ⊸L (exch-merge i M12) (exch-merge i M23) (exch-merge i M) (nay (exch-update U12) mC) (yea (exch-update U23)) (exch-≥ᶜ Δ₁≥m₁) (exch-≥ᶜ Δ₂≥m₁) (exch-contr cCΔ₂) (exch-admit i D1) (exch-admit (suc i) D2)
+  ... | nay U12 mC1 | nay U23 mC2 = ⊸L (exch-merge i M12) (exch-merge i M23) (exch-merge i M) (nay (exch-update U12) mC1) (nay (exch-update U23) mC2) (exch-≥ᶜ Δ₁≥m₁) (exch-≥ᶜ Δ₂≥m₁) (exch-contr cCΔ₂) (exch-admit i D1) (exch-admit (suc i) D2)
   exch-admit i (𝟙R cW) = 𝟙R (exch-weak cW)
   exch-admit i (𝟙L MC D) with MC
   ... | yea U = 𝟙L (yea (exch-update U)) (exch-admit i D)
