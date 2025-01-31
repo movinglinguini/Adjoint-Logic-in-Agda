@@ -98,7 +98,9 @@ module Logic.Theorems.Lemmas (Atom : Set) where
   weak-admit : Δ ⊢ⁱ ⟨ C , k ⟩ → mWeakenable m → (⟨ A , m ⟩ ∷ Δ) ⊢ⁱ ⟨ C , k ⟩
   weak-admit (id U CW) mWeak = id (S U) (weak/c CW mWeak)
   --- back to this with pen and paper
-  weak-admit (cut M1 M2 M3 Δ₁≥m Δ₂≥m m≥k CC D1 D2) mWeak = {!   !}
+  weak-admit (cut M1 M2 M3 Δ₁≥m Δ₂≥m m≥k CC D1 D2) mWeak with mWeak
+  ... | mweak/u = cut (mg/c M1 u∙u) (mg/c M2 u∙u) (mg/c M3 u∙u) (S Δ₁≥m u≥m) (S Δ₂≥m u≥m) m≥k (cont/c CC mcontract/u) (weak-admit D1 mWeak) (exch₀ (weak-admit D2 mWeak))
+  ... | mweak/i = cut (mg/c M1 i∙i) (mg/c M2 i∙i) (mg/c M3 i∙i) (S Δ₁≥m i≥m) (S Δ₂≥m i≥m) m≥k (cont/c CC mcontract/i) (weak-admit D1 mWeak) (exch₀ (weak-admit D2 mWeak))
   weak-admit (⊕R₁ D) mWeak = ⊕R₁ (weak-admit D mWeak)  
   weak-admit (⊕R₂ D) mWeak = ⊕R₂ (weak-admit D mWeak)
   weak-admit (⊕L MC D1 D2) mWeak with MC
@@ -118,11 +120,15 @@ module Logic.Theorems.Lemmas (Atom : Set) where
   ... | yea U = ⊗L (yea (S U)) (exch-admit (Fin.suc zero) (exch₀ (weak-admit D mWeak)))
   ... | nay U mC = ⊗L (nay (S U) mC) (exch-admit (Fin.suc zero) (exch₀ (weak-admit D mWeak)))
   weak-admit (⊸R D) mWeak = ⊸R (exch₀ (weak-admit D mWeak))
-  weak-admit (⊸L M12 M23 M mC12 mC23 Δ₁≥m₁ Δ₂≥m₁ cCΔ₂ D1 D2) mWeak with mC12 | mC23
-  ... | yea U12 | yea U23 = {!   !}
-  ... | yea U12 | nay U23 x₂ = {!   !}
-  ... | nay U12 x₁ | yea U23 = {!   !}
-  ... | nay U12 x₁ | nay U23 x₃ = {!   !}
+  weak-admit (⊸L M12 M23 M mC12 mC23 Δ₁≥m₁ Δ₂≥m₁ cCΔ₂ D1 D2) mWeak with mC12 | mC23 | mWeak
+  ... | yea U1 | yea U2 | mweak/u = ⊸L (mg/c M12 u∙u) (mg/c M23 u∙u) (mg/c M u∙u) (yea (S U1)) (yea (S U2)) (S Δ₁≥m₁ u≥m) (S Δ₂≥m₁ u≥m) (cont/c cCΔ₂ mcontract/u) (weak-admit D1 mWeak) (exch₀ (weak-admit D2 mWeak))
+  ... | nay U1 mC | yea U2 | mweak/u = ⊸L (mg/c M12 u∙u) (mg/c M23 u∙u) (mg/c M u∙u) (nay (S U1) mC) (yea (S U2)) (S Δ₁≥m₁ u≥m) (S Δ₂≥m₁ u≥m) (cont/c cCΔ₂ mcontract/u) (weak-admit D1 mWeak) (exch₀ (weak-admit D2 mWeak))
+  ... | yea U1 | nay U2 mC | mweak/u = ⊸L (mg/c M12 u∙u) (mg/c M23 u∙u) (mg/c M u∙u) (yea (S U1)) (nay (S U2) mC) (S Δ₁≥m₁ u≥m) (S Δ₂≥m₁ u≥m) (cont/c cCΔ₂ mcontract/u) (weak-admit D1 mWeak) (exch₀ (weak-admit D2 mWeak))
+  ... | nay U1 mC1 | nay U2 mC2 | mweak/u = ⊸L (mg/c M12 u∙u) (mg/c M23 u∙u) (mg/c M u∙u) (nay (S U1) mC1) (nay (S U2) mC2) (S Δ₁≥m₁ u≥m) (S Δ₂≥m₁ u≥m) (cont/c cCΔ₂ mcontract/u) (weak-admit D1 mWeak) (exch₀ (weak-admit D2 mWeak))
+  ... | yea U1 | yea U2 | mweak/i = ⊸L (mg/c M12 i∙i) (mg/c M23 i∙i) (mg/c M i∙i) (yea (S U1)) (yea (S U2)) (S Δ₁≥m₁ i≥m) (S Δ₂≥m₁ i≥m) (cont/c cCΔ₂ mcontract/i) (weak-admit D1 mWeak) (exch₀ (weak-admit D2 mWeak))
+  ... | nay U1 mC | yea U2 | mweak/i = ⊸L (mg/c M12 i∙i) (mg/c M23 i∙i) (mg/c M i∙i) (nay (S U1) mC) (yea (S U2)) (S Δ₁≥m₁ i≥m) (S Δ₂≥m₁ i≥m) (cont/c cCΔ₂ mcontract/i) (weak-admit D1 mWeak) (exch₀ (weak-admit D2 mWeak))
+  ... | yea U1 | nay U2 mC | mweak/i = ⊸L (mg/c M12 i∙i) (mg/c M23 i∙i) (mg/c M i∙i) (yea (S U1)) (nay (S U2) mC) (S Δ₁≥m₁ i≥m) (S Δ₂≥m₁ i≥m) (cont/c cCΔ₂ mcontract/i) (weak-admit D1 mWeak) (exch₀ (weak-admit D2 mWeak))
+  ... | nay U1 mC1 | nay U2 mC2 | mweak/i = ⊸L (mg/c M12 i∙i) (mg/c M23 i∙i) (mg/c M i∙i) (nay (S U1) mC1) (nay (S U2) mC2) (S Δ₁≥m₁ i≥m) (S Δ₂≥m₁ i≥m) (cont/c cCΔ₂ mcontract/i) (weak-admit D1 mWeak) (exch₀ (weak-admit D2 mWeak))
   weak-admit (𝟙R x) mWeak = 𝟙R (weak/c x mWeak)
   weak-admit (𝟙L MC D) mWeak with MC
   ... | yea U = 𝟙L (yea (S U)) (weak-admit D mWeak) 
