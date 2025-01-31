@@ -10,7 +10,7 @@ module Logic.Theorems.Thms where
     unit : Atom
 
   open import Logic.Adjoint Atom
-  open import Logic.Theorems.Lemmas Atom
+  --open import Logic.Theorems.Lemmas Atom
 
   impl_to_expl : Δ ⊢ⁱ ⟨ C , m ⟩ → Δ ⊢ᵉ ⟨ C , m ⟩
   impl_to_expl (id U1 W1) = id U1 {!   !}
@@ -38,7 +38,7 @@ module Logic.Theorems.Thms where
   impl_to_expl (↑R D1) = ↑R (impl_to_expl D1)
   impl_to_expl (↑L (yea U1) G1 D1) = ↑L U1 G1 (impl_to_expl D1)
   impl_to_expl (↑L (nay U1 C1) G1 D1) = {!   !}
-    
+
   expl_to_impl : Δ ⊢ᵉ ⟨ C , m ⟩ → Δ ⊢ⁱ ⟨ C , m ⟩
   expl_to_impl (id U1 E1) = id U1 (exh_to_cWeakenable E1)
   expl_to_impl (cut M1 G1 G2 D1 D2) with
@@ -48,15 +48,15 @@ module Logic.Theorems.Thms where
           refl ← merge-cancl M2 (merge-comm M6) =
             cut M2 (merge-comm M3) M1 G1 {!   !} G2 (exh_to_cContractable E2) (expl_to_impl D1) (expl_to_impl D2)
             -- TODO: for this to work: need to define ≥ only on non-irrelevant modes?
-  expl_to_impl (weak U1 W1 D1) = {!   !} --TODO: prove admissibility of weakening as lemma
-  expl_to_impl (contr U1 C1 D1) = {!   !} -- TODO: prove admissibility of contraction as lemma
+  expl_to_impl (weak U1 W1 D1) = weak-admit2 U1 W1 (expl_to_impl D1)
+  expl_to_impl (contr U1 C1 D1) = contr-admit U1 C1 (expl_to_impl D1)
   expl_to_impl (⊕R₁ D1) = ⊕R₁ (expl_to_impl D1)
   expl_to_impl (⊕R₂ D1) = ⊕R₂ (expl_to_impl D1)
   expl_to_impl (⊕L U1 D1 D2) = ⊕L (yea U1) (expl_to_impl D1) (expl_to_impl D2)
   expl_to_impl (&R D1 D2) = &R (expl_to_impl D1) (expl_to_impl D2)
   expl_to_impl (&L₁ U1 D1) = &L₁ (yea U1) (expl_to_impl D1)
   expl_to_impl (&L₂ U1 D1) = &L₂ (yea U1) (expl_to_impl D1)    
-  expl_to_impl (⊗R M1 D1 D2) with 
+  expl_to_impl (⊗R M1 D1 D2) with
     merge/getid M2 E1 ← merge-getid _ | merge/getid M3 E2 ← merge-getid _ with
       merge/assoc M4 _ ← merge-assoc M2 M1 | merge/assoc M5 M6 ← merge-assoc M3 (merge-comm M1) with
         refl ← merge-cancl M4 M1 | refl ← merge-cancl M5 (merge-comm M1) with

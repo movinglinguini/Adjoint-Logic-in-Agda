@@ -6,7 +6,6 @@ open import Data.Nat
 open import Data.Product renaming (_,_ to ⟨_,_⟩)
 open import Relation.Binary.PropositionalEquality
 
-
 module Logic.Theorems.Lemmas (Atom : Set) where
   
   open import Logic.Adjoint Atom
@@ -14,32 +13,33 @@ module Logic.Theorems.Lemmas (Atom : Set) where
   {--------------------------------------
   Lemma: Admissibility of exchange
   ----------------------------------------}
-  ctxt-exch : ∀ { n } (i : Fin n) → Context (suc n) → Context (suc n)
+  
+  ctxt-exch : ∀ (i : Fin n) → Context (suc n) → Context (suc n)
   ctxt-exch zero (A ∷ B ∷ Δ) = B ∷ A ∷ Δ
   ctxt-exch (suc i) (A ∷ Δ) = A ∷ ctxt-exch i Δ
 
-  exch-weak : ∀ { n } { i : Fin n } { Δ : Context (suc n) } → cWeakenable Δ → cWeakenable (ctxt-exch i Δ)
+  exch-weak : ∀ { i : Fin n } { Δ : Context (suc n) } → cWeakenable Δ → cWeakenable (ctxt-exch i Δ)
   exch-weak (weak/c cW x) = {!   !}
 
-  exch-contr : ∀ { n } { i : Fin n } { Δ : Context (suc n) } → cContractable Δ → cContractable (ctxt-exch i Δ)
+  exch-contr : ∀ { i : Fin n } { Δ : Context (suc n) } → cContractable Δ → cContractable (ctxt-exch i Δ)
   exch-contr (cont/c cC x) = {!   !}
 
-  exch-merge : ∀ { n } ( i : Fin n ) { Δ₁ Δ₂ Δ : Context (suc n) }
+  exch-merge : ∀ ( i : Fin n ) { Δ₁ Δ₂ Δ : Context (suc n) }
     → merge Δ₁ Δ₂ Δ 
     → merge (ctxt-exch i Δ₁) (ctxt-exch i Δ₂) (ctxt-exch i Δ)
   exch-merge i (mg/c (mg/c M x₁) x) = {!   !}
 
-  exch-≥ᶜ : ∀ { n } { i : Fin n } { Δ : Context (suc n) }
+  exch-≥ᶜ : ∀ { i : Fin n } { Δ : Context (suc n) }
     → Δ ≥ᶜ m
     → (ctxt-exch i Δ) ≥ᶜ m
   exch-≥ᶜ Δ≥m = {!   !}
 
-  exch-update : ∀ { n } { i : Fin n } { Δ Δ' : Context (suc n) } 
+  exch-update : ∀ { i : Fin n } { Δ Δ' : Context (suc n) } 
                 → update Δ ⟨ A , m ⟩ ⟨ B , l ⟩ Δ' 
                 → update (ctxt-exch i Δ) ⟨ A , m ⟩ ⟨ B , l ⟩ (ctxt-exch i Δ')
   exch-update {i = i} {Δ = Δ} U = {!   !}
 
-  exch-consume : ∀ { n } { i : Fin n } { Δ Δ' : Context (suc n) } 
+  exch-consume : ∀ { i : Fin n } { Δ Δ' : Context (suc n) } 
                   → mayConsume Δ ⟨ A , m ⟩ Δ'
                   → mayConsume (ctxt-exch i Δ) ⟨ A , m ⟩ (ctxt-exch i Δ')
   exch-consume (yea U) = yea (exch-update U)
@@ -91,13 +91,9 @@ module Logic.Theorems.Lemmas (Atom : Set) where
   {---------------------------------------
   Lemma: Admissibility of weakening
   ----------------------------------------}
-  ctxt-weak : ∀ { m : Mode } 
-    → Context n → (Prop × Mode) → mWeakenable m → Context (suc n) 
-  ctxt-weak Δ A mW = A ∷ Δ
 
   weak-admit : Δ ⊢ⁱ ⟨ C , k ⟩ → mWeakenable m → (⟨ A , m ⟩ ∷ Δ) ⊢ⁱ ⟨ C , k ⟩
   weak-admit (id U CW) mWeak = id (S U) (weak/c CW mWeak)
-  --- back to this with pen and paper
   weak-admit (cut M1 M2 M3 Δ₁≥m Δ₂≥m m≥k CC D1 D2) mWeak with mWeak
   ... | mweak/u = cut (mg/c M1 u∙u) (mg/c M2 u∙u) (mg/c M3 u∙u) (S Δ₁≥m u≥m) (S Δ₂≥m u≥m) m≥k (cont/c CC mcontract/u) (weak-admit D1 mWeak) (exch₀ (weak-admit D2 mWeak))
   ... | mweak/i = cut (mg/c M1 i∙i) (mg/c M2 i∙i) (mg/c M3 i∙i) (S Δ₁≥m i≥m) (S Δ₂≥m i≥m) m≥k (cont/c CC mcontract/i) (weak-admit D1 mWeak) (exch₀ (weak-admit D2 mWeak))
@@ -142,4 +138,31 @@ module Logic.Theorems.Lemmas (Atom : Set) where
   weak-admit (↑R D) mWeak = ↑R (weak-admit D mWeak)
   weak-admit (↑L MC x D) mWeak with MC
   ... | yea U = ↑L (yea (S U)) x (exch₀ (weak-admit D mWeak))         
-  ... | nay U mC = ↑L (nay (S U) mC) x (exch₀ (weak-admit D mWeak))   
+  ... | nay U mC = ↑L (nay (S U) mC) x (exch₀ (weak-admit D mWeak))
+
+  weak-admit2 : update Δ ⟨ A , m ⟩ ⟨ A , Irrelevant ⟩ Δ' → mWeakenable m → Δ' ⊢ⁱ ⟨ C , k ⟩ → Δ ⊢ⁱ ⟨ C , k ⟩
+  weak-admit2 U1 MW D1 = {!   !}
+
+  {---------------------------------------
+  Lemma: Admissibility of contraction
+  ----------------------------------------}
+
+  contr-admit : update Δ ⟨ A , m ⟩ ⟨ A , m ⟩ Δ → mContractable m → (⟨ A , m ⟩ ∷ Δ) ⊢ⁱ ⟨ C , k ⟩ → Δ ⊢ⁱ ⟨ C , k ⟩
+  contr-admit U1 MC1 (id U2 CW) = {!   !}
+  contr-admit U1 MC1 (cut M1 M2 M3 Δ₁≥m Δ₂≥m m≥k CC D1 D2) = {!   !}
+  contr-admit U1 MC1 (⊕R₁ D) = ⊕R₁ (contr-admit U1 MC1 D)
+  contr-admit U1 MC1 (⊕R₂ D) = ⊕R₂ (contr-admit U1 MC1 D)
+  contr-admit U1 MC1 (⊕L MC D1 D2) = {!   !}
+  contr-admit U1 MC1 (&R D1 D2) = &R (contr-admit U1 MC1 D1) (contr-admit U1 MC1 D2)
+  contr-admit U1 MC1 (&L₁ MC D1) = {!   !}
+  contr-admit U1 MC1 (&L₂ MC D1) = {!   !}
+  contr-admit U1 MC1 (⊗R M12 M23 M C D1 D2) = {!   !}
+  contr-admit U1 MC1 (⊗L MC D) = {!   !}
+  contr-admit U1 MC1 (⊸R D) = {!   !}
+  contr-admit U1 MC1 (⊸L M12 M23 M mC12 mC23 Δ₁≥m₁ Δ₂≥m₁ cCΔ₂ D1 D2) = {!   !}
+  contr-admit U1 MC1 (𝟙R CW) = {!   !}
+  contr-admit U1 MC1 (𝟙L MC D) = {!   !}
+  contr-admit U1 MC1 (↓R M Δ≥k cW D) = {!   !}
+  contr-admit U1 MC1 (↓L MC D) = {!   !}
+  contr-admit U1 MC1 (↑R D) = ↑R (contr-admit U1 MC1 D)
+  contr-admit U1 MC1 (↑L MC GT D) = {!   !}

@@ -36,16 +36,16 @@ module Logic.Core.Contexts (Atom : Set) where
       → merge (⟨ A , m₁ ⟩ ∷ Δ₁) (⟨ A , m₂ ⟩ ∷ Δ₂) (⟨ A , m ⟩ ∷ Δ)
 
   data update : Context n → Prop × Mode → Prop × Mode → Context n → Set where
-    N : update (⟨ A , m ⟩ ∷ Δ) (⟨ A , m ⟩) (⟨ B , k ⟩) (⟨ B , k ⟩ ∷ Δ)
+    N : update (⟨ A , m ⟩ ∷ Δ) ⟨ A , m ⟩ ⟨ B , k ⟩ (⟨ B , k ⟩ ∷ Δ)
 
-    S : update Δ (⟨ A , m ⟩) (⟨ B , k ⟩) Δ'
-      → update (⟨ C , l ⟩ ∷ Δ) (⟨ A , m ⟩) (⟨ B , k ⟩) (⟨ C , l ⟩ ∷ Δ')
+    S : update Δ ⟨ A , m ⟩ ⟨ B , k ⟩ Δ'
+      → update (⟨ C , l ⟩ ∷ Δ) ⟨ A , m ⟩ ⟨ B , k ⟩ (⟨ C , l ⟩ ∷ Δ')
 
   data mayConsume : Context n → Prop × Mode → Context n → Set where
-    yea : update Δ (⟨ A , m ⟩) (⟨ A , Irrelevant ⟩) Δ'
+    yea : update Δ ⟨ A , m ⟩ ⟨ A , Irrelevant ⟩ Δ'
       → mayConsume Δ ⟨ A , m ⟩ Δ'
 
-    nay : update Δ (⟨ A , m ⟩) (⟨ A , m ⟩) Δ → mContractable m
+    nay : update Δ ⟨ A , m ⟩ ⟨ A , m ⟩ Δ → mContractable m
       → mayConsume Δ ⟨ A , m ⟩ Δ
 
   ----------------------------------------------------------
@@ -98,10 +98,19 @@ module Logic.Core.Contexts (Atom : Set) where
   merge-getid (⟨ A , m ⟩ ∷ Δ) with
     merge/getid M1 E1 ← merge-getid Δ
       | ∙/getid M2 H1 ← ∙-getid m = merge/getid (mg/c M1 M2) (exh/c E1 H1)
-  
-  {------
-    Properties of cWeakenable
-  -------}
+
+  ----------------------------------------------------------
+  -- Properties of update
+  ----------------------------------------------------------
+
+  upd-symm : update Δ ⟨ A , m ⟩ ⟨ B , k ⟩ Δ' → update Δ' ⟨ B , k ⟩ ⟨ A , m ⟩ Δ
+  upd-symm N = N
+  upd-symm (S U) = S (upd-symm U)
+
+  ----------------------------------------------------------
+  -- Properties of cWeakenable
+  ----------------------------------------------------------
+
   cWeaken-to-mWeaken : cWeakenable (⟨ A , m ⟩ ∷ Δ) → mWeakenable m
   cWeaken-to-mWeaken (weak/c cW x) = x
 
