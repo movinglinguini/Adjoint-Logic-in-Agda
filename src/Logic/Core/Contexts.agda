@@ -12,7 +12,7 @@ module Logic.Core.Contexts (Atom : Set) where
 
   variable
     n : ℕ
-    Δ Δ' Δ₁ Δ₂ Δ₃ Δ₂' Δ₁₂ Δ₂₃ Δ₁₂' Δ₂₃'  : Context n
+    Δ Δ' Δ'' Δ₁ Δ₂ Δ₃ Δ₂' Δ₁₂ Δ₂₃ Δ₁₂' Δ₂₃'  : Context n
 
   data cWeakenable : Context n → Set where
     weak/n : cWeakenable []
@@ -103,9 +103,15 @@ module Logic.Core.Contexts (Atom : Set) where
   -- Properties of update
   ----------------------------------------------------------
 
+  upd-refl : update Δ ⟨ A , m ⟩ ⟨ B , k ⟩ Δ' → update Δ ⟨ A , m ⟩ ⟨ A , m ⟩ Δ
+  upd-refl N = N
+  upd-refl (S U1) = S (upd-refl U1)
+
   upd-symm : update Δ ⟨ A , m ⟩ ⟨ B , k ⟩ Δ' → update Δ' ⟨ B , k ⟩ ⟨ A , m ⟩ Δ
   upd-symm N = N
   upd-symm (S U) = S (upd-symm U)
+
+  -- Note: functionality, transitivity will fail since don't track location; probably want to generalize
 
   ----------------------------------------------------------
   -- Properties of cWeakenable

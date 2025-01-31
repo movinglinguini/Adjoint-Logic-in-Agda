@@ -97,7 +97,7 @@ module Logic.Theorems.Lemmas (Atom : Set) where
   weak-admit (cut M1 M2 M3 Δ₁≥m Δ₂≥m m≥k CC D1 D2) mWeak with mWeak
   ... | mweak/u = cut (mg/c M1 u∙u) (mg/c M2 u∙u) (mg/c M3 u∙u) (S Δ₁≥m u≥m) (S Δ₂≥m u≥m) m≥k (cont/c CC mcontract/u) (weak-admit D1 mWeak) (exch₀ (weak-admit D2 mWeak))
   ... | mweak/i = cut (mg/c M1 i∙i) (mg/c M2 i∙i) (mg/c M3 i∙i) (S Δ₁≥m i≥m) (S Δ₂≥m i≥m) m≥k (cont/c CC mcontract/i) (weak-admit D1 mWeak) (exch₀ (weak-admit D2 mWeak))
-  weak-admit (⊕R₁ D) mWeak = ⊕R₁ (weak-admit D mWeak)  
+  weak-admit (⊕R₁ D) mWeak = ⊕R₁ (weak-admit D mWeak)
   weak-admit (⊕R₂ D) mWeak = ⊕R₂ (weak-admit D mWeak)
   weak-admit (⊕L MC D1 D2) mWeak with MC
   ... | yea U = ⊕L (yea (S U)) (exch₀ (weak-admit D1 mWeak)) (exch₀ (weak-admit D2 mWeak))
@@ -137,7 +137,7 @@ module Logic.Theorems.Lemmas (Atom : Set) where
   ... | nay U mC = ↓L (nay (S U) mC) (exch₀ (weak-admit D mWeak))
   weak-admit (↑R D) mWeak = ↑R (weak-admit D mWeak)
   weak-admit (↑L MC x D) mWeak with MC
-  ... | yea U = ↑L (yea (S U)) x (exch₀ (weak-admit D mWeak))         
+  ... | yea U = ↑L (yea (S U)) x (exch₀ (weak-admit D mWeak))
   ... | nay U mC = ↑L (nay (S U) mC) x (exch₀ (weak-admit D mWeak))
 
   weak-admit2 : update Δ ⟨ A , m ⟩ ⟨ A , Irrelevant ⟩ Δ' → mWeakenable m → Δ' ⊢ⁱ ⟨ C , k ⟩ → Δ ⊢ⁱ ⟨ C , k ⟩
@@ -148,8 +148,8 @@ module Logic.Theorems.Lemmas (Atom : Set) where
   ----------------------------------------}
 
   contr-admit : update Δ ⟨ A , m ⟩ ⟨ A , m ⟩ Δ → mContractable m → (⟨ A , m ⟩ ∷ Δ) ⊢ⁱ ⟨ C , k ⟩ → Δ ⊢ⁱ ⟨ C , k ⟩
-  contr-admit U1 MC1 (id U2 CW) = {!   !}
-  contr-admit U1 MC1 (cut M1 M2 M3 Δ₁≥m Δ₂≥m m≥k CC D1 D2) = {!   !}
+  contr-admit U1 MC1 (id U2 (weak/c CW mW)) = {!   !}
+  contr-admit U1 MC1 (cut (mg/c M1 T1) (mg/c M2 T2) (mg/c M3 T3) Δ₁≥m Δ₂≥m m≥k CC D1 D2) = {!  !}
   contr-admit U1 MC1 (⊕R₁ D) = ⊕R₁ (contr-admit U1 MC1 D)
   contr-admit U1 MC1 (⊕R₂ D) = ⊕R₂ (contr-admit U1 MC1 D)
   contr-admit U1 MC1 (⊕L MC D1 D2) = {!   !}
@@ -157,12 +157,12 @@ module Logic.Theorems.Lemmas (Atom : Set) where
   contr-admit U1 MC1 (&L₁ MC D1) = {!   !}
   contr-admit U1 MC1 (&L₂ MC D1) = {!   !}
   contr-admit U1 MC1 (⊗R M12 M23 M C D1 D2) = {!   !}
-  contr-admit U1 MC1 (⊗L MC D) = {!   !}
-  contr-admit U1 MC1 (⊸R D) = {!   !}
+  contr-admit U1 MC1 (⊗L MC D) = {!  !}
+  contr-admit U1 MC1 (⊸R D) = {!   !} -- use some form of exchange to bring ⟨ A , m ⟩ to top
   contr-admit U1 MC1 (⊸L M12 M23 M mC12 mC23 Δ₁≥m₁ Δ₂≥m₁ cCΔ₂ D1 D2) = {!   !}
-  contr-admit U1 MC1 (𝟙R CW) = {!   !}
-  contr-admit U1 MC1 (𝟙L MC D) = {!   !}
+  contr-admit U1 MC1 (𝟙R (weak/c CW mW)) = 𝟙R CW
+  contr-admit U1 MC1 (𝟙L MC D) = {!  !}
   contr-admit U1 MC1 (↓R M Δ≥k cW D) = {!   !}
   contr-admit U1 MC1 (↓L MC D) = {!   !}
   contr-admit U1 MC1 (↑R D) = ↑R (contr-admit U1 MC1 D)
-  contr-admit U1 MC1 (↑L MC GT D) = {!   !}
+  contr-admit U1 MC1 (↑L MC GT D) = {!   !}  
