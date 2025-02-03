@@ -6,8 +6,8 @@ open import Logic.Core.Terms
 
 module Logic.Adjoint (Atom : Set) (T : Set) (subst : Prop (Atom) → Term (T) → Prop (Atom))  where
 
-  open import Logic.Core.Modes public
-  open import Logic.Core.Contexts Atom T public
+  open import Logic.Core.Modes
+  open import Logic.Core.Contexts Atom T
 
   data _⊢ⁱ_ : Context y n → (Prop (Atom) × Mode) → Set where
 
