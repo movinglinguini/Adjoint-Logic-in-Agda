@@ -17,8 +17,11 @@ module Logic.Core.Props (Atom : Set) where
     _⊕_ : Prop → Prop → Prop
     -- With - Using the binary version rather than the n-ary version for simplicity
     _&_ : Prop → Prop → Prop
+    -- Shifts
     ↑[_][_]_ : Mode → Mode → Prop → Prop
     ↓[_][_]_ : Mode → Mode → Prop → Prop
+    -- for all
+    ∀[_] : Prop → Prop
 
   variable
     A B C : Prop

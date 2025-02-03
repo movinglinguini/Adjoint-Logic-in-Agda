@@ -4,49 +4,56 @@ open import Data.Product renaming (_,_ to ⟨_,_⟩)
 open import Relation.Binary.PropositionalEquality
 open import Logic.Core.Modes
 
-module Logic.Core.Contexts (Atom : Set) where
+module Logic.Core.Contexts (Atom : Set) (T : Set) where
   open import Logic.Core.Props Atom
+  open import Logic.Core.Terms T
 
-  Context : ∀ ( n : ℕ ) → Set
-  Context n = Vec (Prop × Mode) n
+  Context : ∀ ( m n : ℕ ) → Set
+  Context m n = (Vec Term m) × (Vec (Prop × Mode) n)
 
   variable
-    n : ℕ
-    Δ Δ' Δ'' Δ₁ Δ₂ Δ₃ Δ₂' Δ₁₂ Δ₂₃ Δ₁₂' Δ₂₃'  : Context n
+    n y z : ℕ
+    𝕋 : Vec Term y
+    Δ Δ' Δ'' Δ₁ Δ₂ Δ₃ Δ₂' Δ₁₂ Δ₂₃ Δ₁₂' Δ₂₃'  : Context y n
 
-  data cWeakenable : Context n → Set where
-    weak/n : cWeakenable []
-    weak/c : cWeakenable Δ → mWeakenable m → cWeakenable (⟨ A , m ⟩ ∷ Δ)
+  data cWeakenable : Context y n → Set where
+    weak/n : cWeakenable ⟨ 𝕋 , [] ⟩
+    weak/c : cWeakenable Δ → mWeakenable m → cWeakenable ⟨ proj₁ Δ , (⟨ A , m ⟩ ∷ proj₂ Δ) ⟩
 
-  data cContractable : Context n → Set where
-    cont/n : cContractable []
-    cont/c : cContractable Δ → mContractable m → cContractable (⟨ A , m ⟩ ∷ Δ)
+  data cContractable : Context y n → Set where
+    cont/n : cContractable ⟨ 𝕋 , [] ⟩
+    cont/c : cContractable Δ → mContractable m → cContractable ⟨ proj₁ Δ , (⟨ A , m ⟩ ∷ proj₂ Δ) ⟩
 
-  data exh : Context n → Set where
-    exh/n : exh []
-    exh/c : exh Δ → harmless m → exh (⟨ A , m ⟩ ∷ Δ)
+  data exh : Context y n → Set where
+    exh/n : exh ⟨ 𝕋 , [] ⟩
+    exh/c : exh Δ → harmless m → exh ⟨ proj₁ Δ , (⟨ A , m ⟩ ∷ proj₂ Δ) ⟩
 
-  data _≥ᶜ_ : Context n → Mode → Set where
-    N : [] ≥ᶜ m
-    S : Δ ≥ᶜ k → m ≥ k → (⟨ A , m ⟩ ∷ Δ) ≥ᶜ k
+  data _≥ᶜ_ : Context y n → Mode → Set where
+    N : ⟨ 𝕋 , [] ⟩ ≥ᶜ m
+    S : Δ ≥ᶜ k → m ≥ k → ⟨ proj₁ Δ , (⟨ A , m ⟩ ∷ proj₂ Δ) ⟩ ≥ᶜ k
 
-  data merge : Context n → Context n → Context n → Set where
-    mg/n : merge [] [] []
+  data merge : Context y n → Context y n → Context y n → Set where
+    mg/n : merge ⟨ 𝕋 , [] ⟩ ⟨ 𝕋 , [] ⟩ ⟨ 𝕋 , [] ⟩
     mg/c : merge Δ₁ Δ₂ Δ → m₁ ∙ m₂ ⇒ m
-      → merge (⟨ A , m₁ ⟩ ∷ Δ₁) (⟨ A , m₂ ⟩ ∷ Δ₂) (⟨ A , m ⟩ ∷ Δ)
+      → merge ⟨ proj₁ Δ₁ , (⟨ A , m₁ ⟩ ∷ proj₂ Δ₁) ⟩ ⟨ proj₁ Δ₂ , (⟨ A , m₂ ⟩ ∷ proj₂ Δ₂) ⟩ ⟨ proj₁ Δ , (⟨ A , m ⟩ ∷ proj₂ Δ) ⟩
 
-  data update : Context n → Prop × Mode → Prop × Mode → Context n → Set where
-    N : update (⟨ A , m ⟩ ∷ Δ) ⟨ A , m ⟩ ⟨ B , k ⟩ (⟨ B , k ⟩ ∷ Δ)
+  data update : Context y n → Prop × Mode → Prop × Mode → Context y n → Set where
+    N : update ⟨ proj₁ Δ , (⟨ A , m ⟩ ∷ proj₂ Δ) ⟩ ⟨ A , m ⟩ ⟨ B , k ⟩ ⟨ proj₁ Δ , (⟨ B , k ⟩ ∷ proj₂ Δ) ⟩
 
     S : update Δ ⟨ A , m ⟩ ⟨ B , k ⟩ Δ'
-      → update (⟨ C , l ⟩ ∷ Δ) ⟨ A , m ⟩ ⟨ B , k ⟩ (⟨ C , l ⟩ ∷ Δ')
+      → update ⟨ proj₁ Δ , (⟨ C , l ⟩ ∷ proj₂ Δ) ⟩ ⟨ A , m ⟩ ⟨ B , k ⟩ ⟨ proj₁ Δ' , (⟨ C , l ⟩ ∷ proj₂ Δ') ⟩
 
-  data mayConsume : Context n → Prop × Mode → Context n → Set where
+  data mayConsume : Context y n → Prop × Mode → Context y n → Set where
     yea : update Δ ⟨ A , m ⟩ ⟨ A , Irrelevant ⟩ Δ'
       → mayConsume Δ ⟨ A , m ⟩ Δ'
 
     nay : update Δ ⟨ A , m ⟩ ⟨ A , m ⟩ Δ → mContractable m
       → mayConsume Δ ⟨ A , m ⟩ Δ
+
+  data isTerm : Context y n → Term → Set where
+    Z : isTerm ⟨ t ∷ proj₁ Δ , proj₂ Δ ⟩ t
+    S : isTerm ⟨ proj₁ Δ , proj₂ Δ ⟩ t₁
+      → isTerm ⟨ t₂ ∷ proj₁ Δ , proj₂ Δ ⟩ t₁
 
   ----------------------------------------------------------
   -- Properties of context predicates
@@ -90,14 +97,14 @@ module Logic.Core.Contexts (Atom : Set) where
     with refl ← merge-cancl M1 M2 
        | refl ← •-cancl T1 T2 = refl
 
-  data mergeGetId : Context n → Set where
+  data mergeGetId : Context y n → Set where
     merge/getid : merge Δ Δ' Δ → exh Δ' → mergeGetId Δ
 
-  merge-getid : ∀ ( Δ : Context n ) → mergeGetId Δ
-  merge-getid [] = merge/getid mg/n exh/n
-  merge-getid (⟨ A , m ⟩ ∷ Δ) with
-    merge/getid M1 E1 ← merge-getid Δ
-      | ∙/getid M2 H1 ← ∙-getid m = merge/getid (mg/c M1 M2) (exh/c E1 H1)
+  merge-getid : ∀ ( Δ : Context y n ) → mergeGetId Δ
+  merge-getid ⟨ fst , [] ⟩ = merge/getid mg/n exh/n
+  merge-getid ⟨ fst , ⟨ A , m ⟩ ∷ snd ⟩ with
+    merge/getid M1 E1 ← merge-getid ⟨ fst , snd ⟩
+      | ∙/getid M2 H1 ← ∙-getid m = merge/getid (mg/c M1 M2) (exh/c E1 H1) 
 
   ----------------------------------------------------------
   -- Properties of update
@@ -117,8 +124,8 @@ module Logic.Core.Contexts (Atom : Set) where
   -- Properties of cWeakenable
   ----------------------------------------------------------
 
-  cWeaken-to-mWeaken : cWeakenable (⟨ A , m ⟩ ∷ Δ) → mWeakenable m
+  cWeaken-to-mWeaken : ∀ { Δ : Context y n } → cWeakenable ⟨ proj₁ Δ , (⟨ A , m ⟩ ∷ proj₂ Δ) ⟩ → mWeakenable m
   cWeaken-to-mWeaken (weak/c cW x) = x
 
-  cWeaken-shrink : cWeakenable (⟨ A , m ⟩ ∷ Δ) → cWeakenable Δ
+  cWeaken-shrink : ∀ { Δ : Context y n } → cWeakenable ⟨ proj₁ Δ , (⟨ A , m ⟩ ∷ proj₂ Δ) ⟩ → cWeakenable ⟨ proj₁ Δ , (proj₂ Δ) ⟩
   cWeaken-shrink (weak/c cW x) = cW
