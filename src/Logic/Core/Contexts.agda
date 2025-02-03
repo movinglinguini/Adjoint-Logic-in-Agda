@@ -11,6 +11,10 @@ module Logic.Core.Contexts (Atom : Set) (T : Set) where
   Context : ∀ ( m n : ℕ ) → Set
   Context m n = (Vec Term m) × (Vec (Prop × Mode) n)
 
+  -- Concatenating contexts
+  _++ᶜ_ : ∀ { w x y z } → Context w x → Context y z → Context (w + y) (x + z)
+  ⟨ terms₁ , props₁ ⟩ ++ᶜ ⟨ terms₂ , props₂ ⟩ = ⟨ terms₁ ++ terms₂ , props₁ ++ props₂ ⟩
+
   variable
     n y z : ℕ
     𝕋 : Vec Term y
@@ -128,4 +132,4 @@ module Logic.Core.Contexts (Atom : Set) (T : Set) where
   cWeaken-to-mWeaken (weak/c cW x) = x
 
   cWeaken-shrink : ∀ { Δ : Context y n } → cWeakenable ⟨ proj₁ Δ , (⟨ A , m ⟩ ∷ proj₂ Δ) ⟩ → cWeakenable ⟨ proj₁ Δ , (proj₂ Δ) ⟩
-  cWeaken-shrink (weak/c cW x) = cW
+  cWeaken-shrink (weak/c cW x) = cW 

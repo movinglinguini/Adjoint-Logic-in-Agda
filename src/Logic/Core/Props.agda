@@ -1,6 +1,9 @@
 open import Logic.Core.Modes
 
 module Logic.Core.Props (Atom : Set) where
+
+  infix 50 _⊗_
+  infix 60 `_
   
   data Prop : Set where
     -- An arbitrary proposition
