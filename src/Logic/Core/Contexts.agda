@@ -15,6 +15,10 @@ module Logic.Core.Contexts (Atom : Set) (T : Set) where
   _++ᶜ_ : ∀ { w x y z } → Context w x → Context y z → Context (w + y) (x + z)
   ⟨ terms₁ , props₁ ⟩ ++ᶜ ⟨ terms₂ , props₂ ⟩ = ⟨ terms₁ ++ terms₂ , props₁ ++ props₂ ⟩
 
+  data Concat : ∀ { w x y z } → Context w x → Context y z → Context (w + y) (x + z) → Set where
+    concat/ctx : ∀ { w x y z } →  { T₁ : Vec Term w } { T₂ : Vec Term y } { P₁ : Vec (Prop × Mode) x } { P₂ : Vec (Prop × Mode) z } 
+      → Concat ⟨ T₁ , P₁ ⟩ ⟨ T₂ , P₂ ⟩ ⟨ T₁ ++ T₂ , P₁ ++ P₂ ⟩   
+
   variable
     n y z : ℕ
     𝕋 : Vec Term y

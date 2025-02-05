@@ -112,3 +112,22 @@ module Logic.Adjoint (Atom : Set) (T : Set) (subst : Prop (Atom) → Term (T) �
         → ⟨ proj₁ Δ' , (⟨ (subst ∀[ A ] t) , m ⟩ ∷ proj₂ Δ') ⟩ ⊢ⁱ ⟨ C , k ⟩
         ----------------
         → Δ ⊢ⁱ ⟨ C , k ⟩
+
+  {--
+    Properties
+  --}
+  postulate
+    ⊗-assoc : Δ ⊢ⁱ ⟨ A ⊗ (B ⊗ C) , m ⟩ → Δ ⊢ⁱ ⟨ (A ⊗ B) ⊗ C , m ⟩
+  -- ⊗-assoc (id x x₁) = id {!  x !} {!   !}
+  -- ⊗-assoc (cut x x₁ x₂ x₃ x₄ x₅ x₆ D D₁) = {!   !}
+  -- ⊗-assoc (⊕L x D D₁) = {!   !}
+  -- ⊗-assoc (&L₁ x D) = {!   !}
+  -- ⊗-assoc (&L₂ x D) = {!   !}
+  -- ⊗-assoc (⊗R x x₁ x₂ x₃ D D₁) = {!   !}
+  -- ⊗-assoc (⊗L x D) = {!   !}
+  -- ⊗-assoc (⊸L x x₁ x₂ x₃ x₄ x₅ x₆ x₇ D D₁) = {!   !}
+  -- ⊗-assoc (𝟙L x D) = {!   !}
+  -- ⊗-assoc (↓L x D) = {!   !}
+  -- ⊗-assoc (↑L x x₁ D) = {!   !}
+  -- ⊗-assoc (∀L x x₁ D) = {!   !}
+   
