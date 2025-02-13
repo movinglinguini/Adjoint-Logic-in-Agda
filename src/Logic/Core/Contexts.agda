@@ -12,7 +12,7 @@ module Logic.Core.Contexts (Atom : Set) where
 
   variable
     n : ℕ
-    Δ Δ' Δ'' Δ₁ Δ₂ Δ₃ Δ₂' Δ₁₂ Δ₂₃ Δ₁₂' Δ₂₃'  : Context n
+    Δ Δ' Δ'' Δ''' Δ₁ Δ₂ Δ₃ Δ₂' Δ₁₂ Δ₂₃ Δ₁₂' Δ₂₃'  : Context n
 
   data cWeakenable : Context n → Set where
     weak/n : cWeakenable []

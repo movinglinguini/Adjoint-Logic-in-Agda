@@ -91,7 +91,8 @@ module Logic.Theorems.Lemmas (Atom : Set) where
   {---------------------------------------
   Lemma: Admissibility of weakening
   ----------------------------------------}
-
+  
+  
   weak-admit : Δ ⊢ⁱ ⟨ C , k ⟩ → mWeakenable m → (⟨ A , m ⟩ ∷ Δ) ⊢ⁱ ⟨ C , k ⟩
   weak-admit (id U CW) mWeak = id (S U) (weak/c CW mWeak)
   weak-admit (cut M1 M2 M3 Δ₁≥m Δ₂≥m m≥k CC D1 D2) mWeak with mWeak
@@ -140,8 +141,38 @@ module Logic.Theorems.Lemmas (Atom : Set) where
   ... | yea U = ↑L (yea (S U)) x (exch₀ (weak-admit D mWeak))
   ... | nay U mC = ↑L (nay (S U) mC) x (exch₀ (weak-admit D mWeak))
 
+  -- weak-weaker : cWeakenable Δ → update Δ ⟨ A , m ⟩ ⟨ A , k ⟩ Δ' → mWeakenable k → cWeakenable Δ'
+  -- weak-weaker cW N mW with cW
+  -- ... | weak/c a x = weak/c a mW
+  -- weak-weaker cW (S U) mW with cW
+  -- ... | weak/c a x = weak/c (weak-weaker a U mW) x
+
+  upd-from-weak : update Δ ⟨ A , m ⟩ ⟨ A , k ⟩ Δ' → mWeakenable m → cWeakenable Δ' → cWeakenable Δ
+  upd-from-weak N mWm (weak/c cW mWk) = weak/c cW mWm
+  upd-from-weak (S U) mWm (weak/c cW mWl) = weak/c (upd-from-weak U mWm cW) mWl
+  
   weak-admit2 : update Δ ⟨ A , m ⟩ ⟨ A , Irrelevant ⟩ Δ' → mWeakenable m → Δ' ⊢ⁱ ⟨ C , k ⟩ → Δ ⊢ⁱ ⟨ C , k ⟩
-  weak-admit2 U1 MW D1 = {!   !}
+  weak-admit2 {m = Unrestricted} N mWm (id U cWΔ') = id {!   !} {!   !}
+  weak-admit2 {m = Irrelevant} N mWm (id U cWΔ') = id U cWΔ'
+  weak-admit2 (S U) mWm (id x x₁) = {!   !}
+  weak-admit2 U mWm (cut x x₁ x₂ x₃ x₄ x₅ x₆ D D₁) = {!   !}
+  weak-admit2 U mWm (⊕R₁ D) = ⊕R₁ (weak-admit2 U mWm D)
+  weak-admit2 U mWm (⊕R₂ D) = ⊕R₂ (weak-admit2 U mWm D) 
+  weak-admit2 U mWm (⊕L (yea x) D1 D2) = {!   !}
+  weak-admit2 U mWm (⊕L (nay x x₁) D1 D2) = {!   !}
+  weak-admit2 U mWm (&R D D₁) = {!   !}
+  weak-admit2 U mWm (&L₁ x D) = {!   !}
+  weak-admit2 U mWm (&L₂ x D) = {!   !}
+  weak-admit2 U mWm (⊗R x x₁ x₂ x₃ D D₁) = {!   !}
+  weak-admit2 U mWm (⊗L x D) = {!   !}
+  weak-admit2 U mWm (⊸R D) = {!   !}
+  weak-admit2 U mWm (⊸L x x₁ x₂ x₃ x₄ x₅ x₆ x₇ D D₁) = {!   !}
+  weak-admit2 U mWm (𝟙R x) = {!   !}
+  weak-admit2 U mWm (𝟙L x D) = {!   !}
+  weak-admit2 U mWm (↓R x x₁ x₂ D) = {!   !}
+  weak-admit2 U mWm (↓L x D) = {!   !}
+  weak-admit2 U mWm (↑R D) = {!   !}
+  weak-admit2 U mWm (↑L x x₁ D) = {!   !} 
 
   {---------------------------------------
   Lemma: Admissibility of contraction
@@ -165,4 +196,4 @@ module Logic.Theorems.Lemmas (Atom : Set) where
   contr-admit U1 MC1 (↓R M Δ≥k cW D) = {!   !}
   contr-admit U1 MC1 (↓L MC D) = {!   !}
   contr-admit U1 MC1 (↑R D) = ↑R (contr-admit U1 MC1 D)
-  contr-admit U1 MC1 (↑L MC GT D) = {!   !}  
+  contr-admit U1 MC1 (↑L MC GT D) = {!   !}    

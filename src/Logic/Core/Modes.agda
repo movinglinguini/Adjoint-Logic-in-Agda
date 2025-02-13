@@ -12,7 +12,7 @@ module Logic.Core.Modes where
     Irrelevant : Mode
 
   variable
-    m k l m' m₁ m₂ m₃ m₂' m₁₂ m₂₃ : Mode
+    m k l q m' m₁ m₂ m₃ m₂' m₁₂ m₂₃ : Mode
 
   data mWeakenable : Mode → Set where
     mweak/u : mWeakenable Unrestricted
