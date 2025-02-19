@@ -4,9 +4,9 @@ open import Data.Product renaming (_,_ to ⟨_,_⟩)
 open import Relation.Binary.PropositionalEquality
 open import Logic.Core.Modes
 
-module Logic.Core.Contexts (Atom : Set) (T : Set) where
+module Logic.Core.Contexts (Atom : Set) (TermAtom : Set) where
   open import Logic.Core.Props Atom
-  open import Logic.Core.Terms T
+  open import Logic.Core.Terms TermAtom
 
   Context : ∀ ( m n : ℕ ) → Set
   Context m n = (Vec Term m) × (Vec (Prop × Mode) n)
@@ -21,27 +21,27 @@ module Logic.Core.Contexts (Atom : Set) (T : Set) where
 
   variable
     n y z : ℕ
-    𝕋 : Vec Term y
+    T : Vec Term y
     Δ Δ' Δ'' Δ₁ Δ₂ Δ₃ Δ₂' Δ₁₂ Δ₂₃ Δ₁₂' Δ₂₃'  : Context y n
 
   data cWeakenable : Context y n → Set where
-    weak/n : cWeakenable ⟨ 𝕋 , [] ⟩
+    weak/n : cWeakenable ⟨ T , [] ⟩
     weak/c : cWeakenable Δ → mWeakenable m → cWeakenable ⟨ proj₁ Δ , (⟨ A , m ⟩ ∷ proj₂ Δ) ⟩
 
   data cContractable : Context y n → Set where
-    cont/n : cContractable ⟨ 𝕋 , [] ⟩
+    cont/n : cContractable ⟨ T , [] ⟩
     cont/c : cContractable Δ → mContractable m → cContractable ⟨ proj₁ Δ , (⟨ A , m ⟩ ∷ proj₂ Δ) ⟩
 
   data exh : Context y n → Set where
-    exh/n : exh ⟨ 𝕋 , [] ⟩
+    exh/n : exh ⟨ T , [] ⟩
     exh/c : exh Δ → harmless m → exh ⟨ proj₁ Δ , (⟨ A , m ⟩ ∷ proj₂ Δ) ⟩
 
   data _≥ᶜ_ : Context y n → Mode → Set where
-    N : ⟨ 𝕋 , [] ⟩ ≥ᶜ m
+    N : ⟨ T , [] ⟩ ≥ᶜ m
     S : Δ ≥ᶜ k → m ≥ k → ⟨ proj₁ Δ , (⟨ A , m ⟩ ∷ proj₂ Δ) ⟩ ≥ᶜ k
 
   data merge : Context y n → Context y n → Context y n → Set where
-    mg/n : merge ⟨ 𝕋 , [] ⟩ ⟨ 𝕋 , [] ⟩ ⟨ 𝕋 , [] ⟩
+    mg/n : merge ⟨ T , [] ⟩ ⟨ T , [] ⟩ ⟨ T , [] ⟩
     mg/c : merge Δ₁ Δ₂ Δ → m₁ ∙ m₂ ⇒ m
       → merge ⟨ proj₁ Δ₁ , (⟨ A , m₁ ⟩ ∷ proj₂ Δ₁) ⟩ ⟨ proj₁ Δ₂ , (⟨ A , m₂ ⟩ ∷ proj₂ Δ₂) ⟩ ⟨ proj₁ Δ , (⟨ A , m ⟩ ∷ proj₂ Δ) ⟩
 
