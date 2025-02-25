@@ -14,11 +14,7 @@ module Logic.Core.Contexts (Atom : Set) (TermAtom : Set) where
   -- Concatenating contexts
   _++ᶜ_ : ∀ { w x y z } → Context w x → Context y z → Context (w + y) (x + z)
   ⟨ terms₁ , props₁ ⟩ ++ᶜ ⟨ terms₂ , props₂ ⟩ = ⟨ terms₁ ++ terms₂ , props₁ ++ props₂ ⟩
-
-  data Concat : ∀ { w x y z } → Context w x → Context y z → Context (w + y) (x + z) → Set where
-    concat/ctx : ∀ { w x y z } →  { T₁ : Vec Term w } { T₂ : Vec Term y } { P₁ : Vec (Prop × Mode) x } { P₂ : Vec (Prop × Mode) z } 
-      → Concat ⟨ T₁ , P₁ ⟩ ⟨ T₂ , P₂ ⟩ ⟨ T₁ ++ T₂ , P₁ ++ P₂ ⟩   
-
+  
   variable
     n y z : ℕ
     T : Vec Term y
@@ -137,3 +133,24 @@ module Logic.Core.Contexts (Atom : Set) (TermAtom : Set) where
 
   cWeaken-shrink : ∀ { Δ : Context y n } → cWeakenable ⟨ proj₁ Δ , (⟨ A , m ⟩ ∷ proj₂ Δ) ⟩ → cWeakenable ⟨ proj₁ Δ , (proj₂ Δ) ⟩
   cWeaken-shrink (weak/c cW x) = cW 
+
+  ----------------------------------------------------------
+  -- Properties of concatenation
+  ----------------------------------------------------------
+  concat-cWeak : ∀ { Δ } → Δ ≡ Δ₁ ++ᶜ Δ₂ → cWeakenable Δ₁ → cWeakenable Δ₂ → cWeakenable Δ
+  concat-cWeak {Δ₁ = ⟨ fst , [] ⟩} {Δ₂ = ⟨ fst₁ , [] ⟩} refl cWeak1 cWeak2 = weak/n
+  concat-cWeak {Δ₁ = ⟨ fst , [] ⟩} {Δ₂ = ⟨ fst₁ , .(⟨ _ , _ ⟩) ∷ snd ⟩} refl cWeak1 (weak/c cWeak2 x) = weak/c (concat-cWeak refl weak/n cWeak2) x
+  concat-cWeak {Δ₁ = ⟨ fst , .(⟨ _ , _ ⟩) ∷ snd ⟩} {Δ₂ = ⟨ fst₁ , [] ⟩} refl (weak/c cWeak1 x) cWeak2 = weak/c (concat-cWeak refl cWeak1 weak/n) x 
+  concat-cWeak {Δ₁ = ⟨ fst , .(⟨ _ , _ ⟩) ∷ snd ⟩} {Δ₂ = ⟨ fst₁ , .(⟨ _ , _ ⟩) ∷ snd₁ ⟩} refl (weak/c cWeak1 x) (weak/c cWeak2 x₁) = weak/c (concat-cWeak refl cWeak1 (weak/c cWeak2 x₁)) x
+
+  concat-cContr : ∀ { Δ } → Δ ≡ Δ₁ ++ᶜ Δ₂ → cContractable Δ₁ → cContractable Δ₂ → cContractable Δ
+  concat-cContr {Δ₁ = ⟨ fst , [] ⟩} {Δ₂ = ⟨ fst₁ , [] ⟩} refl cContr1 cContr2 = cont/n
+  concat-cContr {Δ₁ = ⟨ fst , [] ⟩} {Δ₂ = ⟨ fst₁ , .(⟨ _ , _ ⟩) ∷ snd₁ ⟩} refl cContr1 (cont/c cContr2 x) = cont/c (concat-cContr refl cont/n cContr2) x 
+  concat-cContr {Δ₁ = ⟨ fst , .(⟨ _ , _ ⟩) ∷ snd ⟩} {Δ₂ = ⟨ fst₁ , [] ⟩} refl (cont/c cContr1 x) cContr2 = cont/c (concat-cContr refl cContr1 cont/n) x 
+  concat-cContr {Δ₁ = ⟨ fst , .(⟨ _ , _ ⟩) ∷ snd ⟩} {Δ₂ = ⟨ fst₁ , .(⟨ _ , _ ⟩) ∷ snd₁ ⟩} refl (cont/c cContr1 x) (cont/c cContr2 x₁) = cont/c (concat-cContr refl cContr1 (cont/c cContr2 x₁)) x 
+
+  concat-merge : ∀ { w x y z } { Δ₁ Δ₂ Δ₃ : Context w x } { Δ₄ Δ₅ Δ₆ : Context y z } → merge Δ₁ Δ₂ Δ₃ → merge Δ₄ Δ₅ Δ₆ → merge (Δ₁ ++ᶜ Δ₄) (Δ₂ ++ᶜ Δ₅) (Δ₃ ++ᶜ Δ₆)
+  concat-merge {x = zero} {z = zero} mg/n mg/n = mg/n
+  concat-merge {x = zero} {z = suc z} mg/n (mg/c M2 x) = mg/c (concat-merge mg/n M2) x 
+  concat-merge {x = suc x} {z = zero} (mg/c M1 x₁) mg/n = mg/c (concat-merge M1 mg/n) x₁ 
+  concat-merge {x = suc x} {z = suc z} (mg/c M1 x₁) (mg/c M2 x₂) = mg/c (concat-merge M1 (mg/c M2 x₂)) x₁

@@ -7,5 +7,3 @@ module Logic.Utils.ModeOf (Atom : Set) where
   modeOf : (Prop × Mode) → Mode
   modeOf ⟨ p , m ⟩ = m 
 
-  data ModeOf : (Prop × Mode) → Mode → Set where
-    mode/prop : ModeOf ⟨ A , m ⟩ m
