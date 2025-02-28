@@ -14,47 +14,49 @@ module Logic.Core.Contexts (Atom : Set) (TermAtom : Set) where
   -- Concatenating contexts
   _++ᶜ_ : ∀ { w x y z } → Context w x → Context y z → Context (w + y) (x + z)
   ⟨ terms₁ , props₁ ⟩ ++ᶜ ⟨ terms₂ , props₂ ⟩ = ⟨ terms₁ ++ terms₂ , props₁ ++ props₂ ⟩
-  
-  variable
-    n y z : ℕ
-    T : Vec Term y
-    Δ Δ' Δ'' Δ₁ Δ₂ Δ₃ Δ₂' Δ₁₂ Δ₂₃ Δ₁₂' Δ₂₃'  : Context y n
+  private
+    variable
+      s n x y z : ℕ
+      T : Vec Term n
+      t t₁ t₂ : Term
+      Δ Δ' Δ'' Δ₁ Δ₂ Δ₃ Δ₂' Δ₁₂ Δ₂₃ Δ₁₂' Δ₂₃'  : Context x y
+      m m₁ m₂ m₃ k l : Mode
 
-  data cWeakenable : Context y n → Set where
+  data cWeakenable : Context x y → Set where
     weak/n : cWeakenable ⟨ T , [] ⟩
     weak/c : cWeakenable Δ → mWeakenable m → cWeakenable ⟨ proj₁ Δ , (⟨ A , m ⟩ ∷ proj₂ Δ) ⟩
 
-  data cContractable : Context y n → Set where
+  data cContractable : Context x y → Set where
     cont/n : cContractable ⟨ T , [] ⟩
     cont/c : cContractable Δ → mContractable m → cContractable ⟨ proj₁ Δ , (⟨ A , m ⟩ ∷ proj₂ Δ) ⟩
 
-  data exh : Context y n → Set where
+  data exh : Context x y → Set where
     exh/n : exh ⟨ T , [] ⟩
     exh/c : exh Δ → harmless m → exh ⟨ proj₁ Δ , (⟨ A , m ⟩ ∷ proj₂ Δ) ⟩
 
-  data _≥ᶜ_ : Context y n → Mode → Set where
+  data _≥ᶜ_ : Context x y → Mode → Set where
     N : ⟨ T , [] ⟩ ≥ᶜ m
     S : Δ ≥ᶜ k → m ≥ k → ⟨ proj₁ Δ , (⟨ A , m ⟩ ∷ proj₂ Δ) ⟩ ≥ᶜ k
 
-  data merge : Context y n → Context y n → Context y n → Set where
+  data merge : Context x y → Context x y → Context x y → Set where
     mg/n : merge ⟨ T , [] ⟩ ⟨ T , [] ⟩ ⟨ T , [] ⟩
     mg/c : merge Δ₁ Δ₂ Δ → m₁ ∙ m₂ ⇒ m
       → merge ⟨ proj₁ Δ₁ , (⟨ A , m₁ ⟩ ∷ proj₂ Δ₁) ⟩ ⟨ proj₁ Δ₂ , (⟨ A , m₂ ⟩ ∷ proj₂ Δ₂) ⟩ ⟨ proj₁ Δ , (⟨ A , m ⟩ ∷ proj₂ Δ) ⟩
 
-  data update : Context y n → Prop × Mode → Prop × Mode → Context y n → Set where
+  data update : Context x y → Prop × Mode → Prop × Mode → Context x y → Set where
     N : update ⟨ proj₁ Δ , (⟨ A , m ⟩ ∷ proj₂ Δ) ⟩ ⟨ A , m ⟩ ⟨ B , k ⟩ ⟨ proj₁ Δ , (⟨ B , k ⟩ ∷ proj₂ Δ) ⟩
 
     S : update Δ ⟨ A , m ⟩ ⟨ B , k ⟩ Δ'
       → update ⟨ proj₁ Δ , (⟨ C , l ⟩ ∷ proj₂ Δ) ⟩ ⟨ A , m ⟩ ⟨ B , k ⟩ ⟨ proj₁ Δ' , (⟨ C , l ⟩ ∷ proj₂ Δ') ⟩
 
-  data mayConsume : Context y n → Prop × Mode → Context y n → Set where
+  data mayConsume : Context x y → Prop × Mode → Context x y → Set where
     yea : update Δ ⟨ A , m ⟩ ⟨ A , Irrelevant ⟩ Δ'
       → mayConsume Δ ⟨ A , m ⟩ Δ'
 
     nay : update Δ ⟨ A , m ⟩ ⟨ A , m ⟩ Δ → mContractable m
       → mayConsume Δ ⟨ A , m ⟩ Δ
 
-  data isTerm : Context y n → Term → Set where
+  data isTerm : Context x y → Term → Set where
     Z : isTerm ⟨ t ∷ proj₁ Δ , proj₂ Δ ⟩ t
     S : isTerm ⟨ proj₁ Δ , proj₂ Δ ⟩ t₁
       → isTerm ⟨ t₂ ∷ proj₁ Δ , proj₂ Δ ⟩ t₁
@@ -101,10 +103,10 @@ module Logic.Core.Contexts (Atom : Set) (TermAtom : Set) where
     with refl ← merge-cancl M1 M2 
        | refl ← •-cancl T1 T2 = refl
 
-  data mergeGetId : Context y n → Set where
+  data mergeGetId : Context x y → Set where
     merge/getid : merge Δ Δ' Δ → exh Δ' → mergeGetId Δ
 
-  merge-getid : ∀ ( Δ : Context y n ) → mergeGetId Δ
+  merge-getid : ∀ ( Δ : Context x y ) → mergeGetId Δ
   merge-getid ⟨ fst , [] ⟩ = merge/getid mg/n exh/n
   merge-getid ⟨ fst , ⟨ A , m ⟩ ∷ snd ⟩ with
     merge/getid M1 E1 ← merge-getid ⟨ fst , snd ⟩
@@ -128,10 +130,10 @@ module Logic.Core.Contexts (Atom : Set) (TermAtom : Set) where
   -- Properties of cWeakenable
   ----------------------------------------------------------
 
-  cWeaken-to-mWeaken : ∀ { Δ : Context y n } → cWeakenable ⟨ proj₁ Δ , (⟨ A , m ⟩ ∷ proj₂ Δ) ⟩ → mWeakenable m
+  cWeaken-to-mWeaken : ∀ { Δ : Context x y } → cWeakenable ⟨ proj₁ Δ , (⟨ A , m ⟩ ∷ proj₂ Δ) ⟩ → mWeakenable m
   cWeaken-to-mWeaken (weak/c cW x) = x
 
-  cWeaken-shrink : ∀ { Δ : Context y n } → cWeakenable ⟨ proj₁ Δ , (⟨ A , m ⟩ ∷ proj₂ Δ) ⟩ → cWeakenable ⟨ proj₁ Δ , (proj₂ Δ) ⟩
+  cWeaken-shrink : ∀ { Δ : Context x y } → cWeakenable ⟨ proj₁ Δ , (⟨ A , m ⟩ ∷ proj₂ Δ) ⟩ → cWeakenable ⟨ proj₁ Δ , (proj₂ Δ) ⟩
   cWeaken-shrink (weak/c cW x) = cW 
 
   ----------------------------------------------------------

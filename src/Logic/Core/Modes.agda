@@ -11,8 +11,9 @@ module Logic.Core.Modes where
     Unrestricted : Mode
     Irrelevant : Mode
 
-  variable
-    m k l m' m₁ m₂ m₃ m₂' m₁₂ m₂₃ : Mode
+  private
+    variable
+      m k l m' m₁ m₂ m₃ m₂' m₁₂ m₂₃ : Mode
 
   data mWeakenable : Mode → Set where
     mweak/u : mWeakenable Unrestricted
