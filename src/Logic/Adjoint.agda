@@ -1,15 +1,23 @@
 open import Data.Vec
 open import Data.Product renaming (_,_ to ⟨_,_⟩)
+open import Data.Nat hiding (_≥_)
 
 open import Logic.Core.Props
 open import Logic.Core.Terms
 
-module Logic.Adjoint (Atom : Set) (T : Set) (subst : Prop (Atom) → Term (T) → Prop (Atom))  where
+module Logic.Adjoint (Atom : Set) (TermAtom : Set) (subst : Prop (Atom) → Term (TermAtom) → Prop (Atom))  where
 
   open import Logic.Core.Modes
-  open import Logic.Core.Contexts Atom T
+  open import Logic.Core.Contexts Atom TermAtom
 
-  data _⊢ⁱ_ : Context y n → (Prop (Atom) × Mode) → Set where
+  private
+    variable
+      x y n : ℕ 
+      Δ Δ' Δ₁ Δ₁' Δ₂ Δ₂' Δ₃ Δ₃' Δ₁₂ Δ₁₂' Δ₂₃ Δ₂₃' : Context x y
+      m k l : Mode
+      t : Term (TermAtom)
+
+  data _⊢ⁱ_ : Context x y → (Prop (Atom) × Mode) → Set where
 
     id : update Δ ⟨ A , m ⟩ ⟨ A , Irrelevant ⟩ Δ' → cWeakenable Δ'
       ----------------------------------------------------------
