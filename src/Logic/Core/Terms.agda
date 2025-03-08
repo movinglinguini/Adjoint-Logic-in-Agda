@@ -1,8 +1,9 @@
 open import Data.Fin
 open import Data.Nat
 
-module Logic.Core.Terms (T : Set) where
+module Logic.Core.Terms (TermAtom : Set) where
   
-  data Term : Set where
-    const : T → Term
-    var : ℕ → Term 
+  -- A term is either a constant or a scoped variable.
+  data Term : ℕ → Set where
+    const : ∀ { n } → TermAtom → Term n
+    var : ∀ { n } ( m : Fin n ) → Term n

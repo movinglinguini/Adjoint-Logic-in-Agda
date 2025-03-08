@@ -5,58 +5,45 @@ open import Data.Nat hiding (_≥_)
 open import Logic.Core.Props
 open import Logic.Core.Terms
 
-module Logic.Adjoint (Atom : Set) (TermAtom : Set) (subst : Prop (Atom) → Term (TermAtom) → Prop (Atom))  where
+module Logic.Adjoint 
+  (PropAtom : Set) 
+  (TermAtom : Set) 
+  (subst-PropAtom : PropAtom → Term TermAtom 0 → PropAtom)  where
 
   open import Logic.Core.Modes
-  open import Logic.Core.Contexts Atom TermAtom
+  open import Logic.Core.Contexts PropAtom TermAtom
+
+  private
+    -- Helper for the substitution function
+    subst-One : Prop (PropAtom) → Term (TermAtom) 0 → Prop (PropAtom)
+    subst-One (` A) t = ` (subst-PropAtom A t)
+    subst-One (L ⊸ R) t = subst-One L t ⊸ subst-One R t
+    subst-One (L ⊗ R) t = (subst-One L t) ⊗ (subst-One R t)
+    subst-One 𝟙 t = 𝟙
+    subst-One ⊤ t = ⊤
+    subst-One ∀[ zero ][ A ] t = subst-One A t
+    subst-One ∀[ suc n ][ A ] t = ∀[ n ][ subst-One A t ]
+
+  {--------------------
+    Substitution function
+  ---------------------}
+  subst : ∀ { n } → Prop (PropAtom) → Vec (Term TermAtom 0) n → Prop (PropAtom)
+  subst A [] = A
+  subst A (t ∷ ts) = subst (subst-One A t) ts
 
   private
     variable
       x y n : ℕ 
       Δ Δ' Δ₁ Δ₁' Δ₂ Δ₂' Δ₃ Δ₃' Δ₁₂ Δ₁₂' Δ₂₃ Δ₂₃' : Context x y
       m k l : Mode
-      t : Term (TermAtom)
+      t : Term TermAtom 0
+      ts : Vec (Term TermAtom 0) n
 
-  data _⊢ⁱ_ : Context x y → (Prop (Atom) × Mode) → Set where
+  data _⊢ⁱ_ : Context x y → (Prop (PropAtom) × Mode) → Set where
 
     id : update Δ ⟨ A , m ⟩ ⟨ A , Irrelevant ⟩ Δ' → cWeakenable Δ'
       ----------------------------------------------------------
       → Δ ⊢ⁱ ⟨ A , m ⟩
-
-    cut : merge Δ₁ Δ₂ Δ₁₂ → merge Δ₂ Δ₃ Δ₂₃ → merge Δ₁₂ Δ₃ Δ
-      → Δ₁ ≥ᶜ m → Δ₂ ≥ᶜ m → m ≥ k
-      → cContractable Δ₂
-      → Δ₁₂ ⊢ⁱ ⟨ A , m ⟩
-      → ⟨ proj₁ Δ₂₃ , (⟨ A , m ⟩ ∷ proj₂ Δ₂₃) ⟩ ⊢ⁱ ⟨ C , k ⟩
-      ----------------------------------------------------------
-      → Δ ⊢ⁱ ⟨ C , k ⟩
-
-    ⊕R₁ : Δ ⊢ⁱ ⟨ A , m ⟩
-      ----------------------------------------------------------
-      → Δ ⊢ⁱ ⟨ A ⊕ B , m ⟩
-
-    ⊕R₂ : Δ ⊢ⁱ ⟨ B , m ⟩
-      ----------------------------------------------------------
-      → Δ ⊢ⁱ ⟨ A ⊕ B , m ⟩
-
-    ⊕L : mayConsume Δ ⟨ A ⊕ B , m ⟩ Δ'
-      →  ⟨ proj₁ Δ' , ( ⟨ A , m ⟩ ∷ proj₂ Δ') ⟩ ⊢ⁱ ⟨ C , k ⟩  →   ⟨ proj₁ Δ' , ⟨ B , m ⟩ ∷ proj₂ Δ' ⟩ ⊢ⁱ ⟨ C , k ⟩
-      ----------------------------------------------------------
-      → Δ ⊢ⁱ ⟨ C , k ⟩
-
-    &R : Δ ⊢ⁱ ⟨ A , m ⟩ → Δ ⊢ⁱ ⟨ B , m ⟩
-      ----------------------------------------------------------
-      → Δ ⊢ⁱ ⟨ A & B , m ⟩
-
-    &L₁ : mayConsume Δ ⟨ A & B , m ⟩ Δ'
-      →  ⟨ proj₁ Δ' , (⟨ A , m ⟩ ∷ proj₂ Δ') ⟩ ⊢ⁱ ⟨ C , k ⟩
-      ----------------------------------------------------------
-      → Δ ⊢ⁱ ⟨ C , k ⟩
-
-    &L₂ : mayConsume Δ ⟨ A & B , m ⟩ Δ'
-      →  ⟨ proj₁ Δ' , (⟨ B , m ⟩ ∷ proj₂ Δ') ⟩ ⊢ⁱ ⟨ C , k ⟩
-      ----------------------------------------------------------
-      → Δ ⊢ⁱ ⟨ C , k ⟩
 
     ⊗R : merge Δ₁ Δ₂ Δ₁₂ → merge Δ₂ Δ₃ Δ₂₃ → merge Δ₁₂ Δ₃ Δ
       → cContractable Δ₂
@@ -68,10 +55,6 @@ module Logic.Adjoint (Atom : Set) (TermAtom : Set) (subst : Prop (Atom) → Term
       → ⟨ proj₁ Δ' , (⟨ B , m ⟩ ∷ ⟨ A , m ⟩ ∷ proj₂ Δ') ⟩ ⊢ⁱ ⟨ C , k ⟩
       ----------------------------------------------------------
       → Δ ⊢ⁱ ⟨ C , k ⟩
-
-    ⊸R : ⟨ proj₁ Δ , (⟨ A , m ⟩ ∷ proj₂ Δ) ⟩ ⊢ⁱ ⟨ B , m ⟩
-      ----------------------------------------------------------
-      → Δ ⊢ⁱ ⟨ A ⊸ B , m ⟩
 
     ⊸L : merge Δ₁ Δ₂ Δ₁₂ → merge Δ₂ Δ₃ Δ₂₃ → merge Δ₁₂ Δ₃ Δ
       → mayConsume Δ₁₂ ⟨ A ⊸ B , m ⟩ Δ₁₂'
@@ -90,34 +73,14 @@ module Logic.Adjoint (Atom : Set) (TermAtom : Set) (subst : Prop (Atom) → Term
       ----------------------------------------------------------
       → Δ ⊢ⁱ ⟨ C , k ⟩
 
-    ↓R : merge Δ₁ Δ₂ Δ
-      → Δ₁ ≥ᶜ m 
-      → cWeakenable Δ₂
-      → Δ₁ ⊢ⁱ ⟨ A , m ⟩
-      ----------------------------------------------------------
-      → Δ ⊢ⁱ ⟨ ↓[ m ][ k ] A , m ⟩
-
-    ↓L : mayConsume Δ ⟨ ↓[ m ][ k ] A , m ⟩ Δ'
-      → ⟨ proj₁ Δ' , (⟨ A , m ⟩ ∷ proj₂ Δ') ⟩ ⊢ⁱ ⟨ C , l ⟩
-      ----------------------------------------------------------
-      → Δ ⊢ⁱ ⟨ C , l ⟩
-
-    ↑R : Δ ⊢ⁱ ⟨ A , k ⟩
-      ----------------------------------------------------------
-      → Δ ⊢ⁱ ⟨ ↑[ m ][ k ] A , k ⟩
-
-    ↑L : mayConsume Δ ⟨ ↑[ k ][ m ] A , k ⟩ Δ' → k ≥ l
-      → ⟨ proj₁ Δ' , (⟨ A , k ⟩ ∷ proj₂ Δ') ⟩ ⊢ⁱ ⟨ C , l ⟩
-      ----------------------------------------------------------
-      → Δ ⊢ⁱ ⟨ C , l ⟩
-
     ⊤R : 
       -----------
       Δ ⊢ⁱ ⟨ ⊤ , m ⟩
 
-    ∀L : mayConsume Δ ⟨ ∀[ A ] , m ⟩ Δ'
-        → isTerm Δ t
-        → ⟨ proj₁ Δ' , (⟨ (subst ∀[ A ] t) , m ⟩ ∷ proj₂ Δ') ⟩ ⊢ⁱ ⟨ C , k ⟩
+    ∀L : ∀ { n } ( ts : Vec (Term (TermAtom) 0) (suc n)) 
+        → mayConsume Δ ⟨ ∀[ n ][ A ] , m ⟩ Δ'
+        → areTerms Δ ts
+        → ⟨ proj₁ Δ' , (⟨ (subst ∀[ n ][ A ] ts) , m ⟩ ∷ proj₂ Δ') ⟩ ⊢ⁱ ⟨ C , k ⟩
         ----------------
         → Δ ⊢ⁱ ⟨ C , k ⟩
 

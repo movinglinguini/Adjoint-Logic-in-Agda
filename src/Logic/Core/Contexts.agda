@@ -9,7 +9,7 @@ module Logic.Core.Contexts (Atom : Set) (TermAtom : Set) where
   open import Logic.Core.Terms TermAtom
 
   Context : ∀ ( m n : ℕ ) → Set
-  Context m n = (Vec Term m) × (Vec (Prop × Mode) n)
+  Context m n = (Vec (Term 0) m) × (Vec (Prop × Mode) n)
 
   -- Concatenating contexts
   _++ᶜ_ : ∀ { w x y z } → Context w x → Context y z → Context (w + y) (x + z)
@@ -17,29 +17,29 @@ module Logic.Core.Contexts (Atom : Set) (TermAtom : Set) where
   private
     variable
       s n x y z : ℕ
-      T : Vec Term n
-      t t₁ t₂ : Term
+      ts : Vec (Term s) n
+      t t₁ t₂ : Term s
       Δ Δ' Δ'' Δ₁ Δ₂ Δ₃ Δ₂' Δ₁₂ Δ₂₃ Δ₁₂' Δ₂₃'  : Context x y
       m m₁ m₂ m₃ k l : Mode
 
   data cWeakenable : Context x y → Set where
-    weak/n : cWeakenable ⟨ T , [] ⟩
+    weak/n : cWeakenable ⟨ ts , [] ⟩
     weak/c : cWeakenable Δ → mWeakenable m → cWeakenable ⟨ proj₁ Δ , (⟨ A , m ⟩ ∷ proj₂ Δ) ⟩
 
   data cContractable : Context x y → Set where
-    cont/n : cContractable ⟨ T , [] ⟩
+    cont/n : cContractable ⟨ ts , [] ⟩
     cont/c : cContractable Δ → mContractable m → cContractable ⟨ proj₁ Δ , (⟨ A , m ⟩ ∷ proj₂ Δ) ⟩
 
   data exh : Context x y → Set where
-    exh/n : exh ⟨ T , [] ⟩
+    exh/n : exh ⟨ ts , [] ⟩
     exh/c : exh Δ → harmless m → exh ⟨ proj₁ Δ , (⟨ A , m ⟩ ∷ proj₂ Δ) ⟩
 
   data _≥ᶜ_ : Context x y → Mode → Set where
-    N : ⟨ T , [] ⟩ ≥ᶜ m
+    N : ⟨ ts , [] ⟩ ≥ᶜ m
     S : Δ ≥ᶜ k → m ≥ k → ⟨ proj₁ Δ , (⟨ A , m ⟩ ∷ proj₂ Δ) ⟩ ≥ᶜ k
 
   data merge : Context x y → Context x y → Context x y → Set where
-    mg/n : merge ⟨ T , [] ⟩ ⟨ T , [] ⟩ ⟨ T , [] ⟩
+    mg/n : merge ⟨ ts , [] ⟩ ⟨ ts , [] ⟩ ⟨ ts , [] ⟩
     mg/c : merge Δ₁ Δ₂ Δ → m₁ ∙ m₂ ⇒ m
       → merge ⟨ proj₁ Δ₁ , (⟨ A , m₁ ⟩ ∷ proj₂ Δ₁) ⟩ ⟨ proj₁ Δ₂ , (⟨ A , m₂ ⟩ ∷ proj₂ Δ₂) ⟩ ⟨ proj₁ Δ , (⟨ A , m ⟩ ∷ proj₂ Δ) ⟩
 
@@ -56,10 +56,16 @@ module Logic.Core.Contexts (Atom : Set) (TermAtom : Set) where
     nay : update Δ ⟨ A , m ⟩ ⟨ A , m ⟩ Δ → mContractable m
       → mayConsume Δ ⟨ A , m ⟩ Δ
 
-  data isTerm : Context x y → Term → Set where
-    Z : isTerm ⟨ t ∷ proj₁ Δ , proj₂ Δ ⟩ t
-    S : isTerm ⟨ proj₁ Δ , proj₂ Δ ⟩ t₁
+  data isTerm : Context x y → (Term 0) → Set where
+    isTerm/z : isTerm ⟨ t ∷ proj₁ Δ , proj₂ Δ ⟩ t
+    isTerm/s : isTerm ⟨ proj₁ Δ , proj₂ Δ ⟩ t₁
       → isTerm ⟨ t₂ ∷ proj₁ Δ , proj₂ Δ ⟩ t₁
+
+  data areTerms : Context x y → Vec (Term 0) n → Set where
+    areTerms/z : areTerms Δ []
+    areTerms/s : areTerms Δ ts
+      → isTerm Δ t
+      → areTerms Δ (t ∷ ts)
 
   ----------------------------------------------------------
   -- Properties of context predicates
