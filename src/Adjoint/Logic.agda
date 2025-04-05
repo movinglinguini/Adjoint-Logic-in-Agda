@@ -11,7 +11,17 @@ module Adjoint.Logic
   (_≥_ : Mode → Mode → Set) 
   where
 
-  {- Just repackage the rules -}
+  {- Repackage all the parts -}
+  open import Adjoint.Core.Props Atom Mode public
+  open import Adjoint.Core.Contexts 
+    Atom 
+    Mode  
+    mWeakenable 
+    mContractable 
+    mHarmless 
+    _∙_⇒_ 
+    _≥_ 
+    public
   open import Adjoint.Core.Rules 
     Atom 
     Mode  
