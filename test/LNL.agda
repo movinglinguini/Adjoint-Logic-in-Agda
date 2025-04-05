@@ -42,7 +42,7 @@ module LNL where
   PropAtom = String
 
   -- Instantiate Adjoint Logic
-  open import Logic.Adjoint
+  open import Adjoint.Logic
     PropAtom
     Mode
     mWeakenable

@@ -1,4 +1,4 @@
-module Logic.Core.Props 
+module Adjoint.Core.Props 
   (Atom : Set) 
   (Mode : Set)
   where

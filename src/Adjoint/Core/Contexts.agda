@@ -6,7 +6,7 @@ open import Relation.Binary.PropositionalEquality
 {-
   Generalized definition of contexts
 -}
-module Logic.Core.Contexts 
+module Adjoint.Core.Contexts 
   (Atom : Set)
   (Mode : Set)
   (mWeakenable : Mode → Set)
@@ -15,7 +15,7 @@ module Logic.Core.Contexts
   (_∙_⇒_ : Mode → Mode → Mode → Set)
   (_≥_ : Mode → Mode → Set)
   where
-  open import Logic.Core.Props Atom Mode
+  open import Adjoint.Core.Props Atom Mode
 
   -- A context is just a vector of moded propositions
   Context : ∀ ( n : ℕ ) → Set

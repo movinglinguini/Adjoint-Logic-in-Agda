@@ -1,7 +1,7 @@
 open import Data.Vec
 open import Data.Product renaming (_,_ to ⟨_,_⟩)
 
-module Logic.Adjoint   
+module Adjoint.Logic   
   (Atom : Set)
   (Mode : Set)
   (mWeakenable : Mode → Set)
@@ -11,8 +11,8 @@ module Logic.Adjoint
   (_≥_ : Mode → Mode → Set) 
   where
 
-  open import Logic.Core.Props Atom Mode public
-  open import Logic.Core.Contexts 
+  open import Adjoint.Core.Props Atom Mode public
+  open import Adjoint.Core.Contexts 
     Atom 
     Mode  
     mWeakenable 
