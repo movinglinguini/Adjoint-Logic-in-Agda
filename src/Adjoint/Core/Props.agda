@@ -1,3 +1,5 @@
+open import Data.Product
+
 module Adjoint.Core.Props 
   (Atom : Set) 
   (Mode : Set)
@@ -22,3 +24,5 @@ module Adjoint.Core.Props
     ↑[_][_]_ : Mode → Mode → Prop → Prop
     -- Downshift
     ↓[_][_]_ : Mode → Mode → Prop → Prop
+  
+  ModedProp = Prop × Mode

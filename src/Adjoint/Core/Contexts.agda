@@ -17,9 +17,7 @@ module Adjoint.Core.Contexts
   where
   open import Adjoint.Core.Props Atom Mode
 
-  -- A context is just a vector of moded propositions
-  Context : ∀ ( n : ℕ ) → Set
-  Context n = Vec (Prop × Mode) n
+  open import CARVe.Context Prop Mode _∙_⇒_
 
   variable
     n : ℕ
@@ -46,20 +44,6 @@ module Adjoint.Core.Contexts
   data _≥ᶜ_ : Context n → Mode → Set where
     ≥/z : [] ≥ᶜ m
     ≥/s : Δ ≥ᶜ k → m ≥ k → (⟨ A , m ⟩ ∷ Δ) ≥ᶜ k
-
-  -- A merge is like the reverse of a context split. To say that 
-  -- merge Δ₁ Δ₂ Δ, we're really saying that Δ can split into Δ₁, Δ₂.
-  data merge : Context n → Context n → Context n → Set where
-    mg/n : merge [] [] []
-    mg/c : merge Δ₁ Δ₂ Δ → m₁ ∙ m₂ ⇒ m
-      → merge (⟨ A , m₁ ⟩ ∷ Δ₁) (⟨ A , m₂ ⟩ ∷ Δ₂) (⟨ A , m ⟩ ∷ Δ)
-
-  -- We allow arbitrarily updating propositions in a context.
-  data update : Context n → Prop × Mode → Prop × Mode → Context n → Set where
-    upd/z : update (⟨ A , m ⟩ ∷ Δ) ⟨ A , m ⟩ ⟨ B , k ⟩ (⟨ B , k ⟩ ∷ Δ)
-
-    upd/s : update Δ ⟨ A , m ⟩ ⟨ B , k ⟩ Δ'
-      → update (⟨ C , l ⟩ ∷ Δ) ⟨ A , m ⟩ ⟨ B , k ⟩ (⟨ C , l ⟩ ∷ Δ')
 
   -- We allow optional "consumption" by optionally marking a proposition as
   -- irrelevant
