@@ -18,12 +18,12 @@ module Adjoint.Core.Contexts
   open import Adjoint.Core.Props Atom Mode
 
   open import CARVe.Context Prop Mode _∙_⇒_ public
-
-  variable
-    n : ℕ
-    Δ Δ' Δ'' Δ''' Δ₁ Δ₂ Δ₃ Δ₂' Δ₁₂ Δ₂₃ Δ₁₂' Δ₂₃'  : Context n
-    A B C : Prop 
-    m k l m₁ m₂ : Mode
+  private 
+    variable
+      n : ℕ
+      Δ Δ' Δ'' Δ''' Δ₁ Δ₂ Δ₃ Δ₂' Δ₁₂ Δ₂₃ Δ₁₂' Δ₂₃'  : Context n
+      A B C : Prop 
+      m k l m₁ m₂ : Mode
 
   -- A context is weakenable if all of its propositions are weakeanable
   data cWeakenable : Context n → Set where
