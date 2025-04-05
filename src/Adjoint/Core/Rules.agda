@@ -11,7 +11,7 @@ module Adjoint.Core.Rules
   (_≥_ : Mode → Mode → Set) 
   where
   
-  open import Adjoint.Core.Props Atom Mode public
+  open import Adjoint.Core.Props Atom Mode
   open import Adjoint.Core.Contexts 
     Atom 
     Mode  
@@ -20,7 +20,6 @@ module Adjoint.Core.Rules
     mHarmless 
     _∙_⇒_ 
     _≥_ 
-    public
   
   data _⊢_ : Context n → ModedProp → Set where
 

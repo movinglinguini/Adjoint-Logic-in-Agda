@@ -17,7 +17,7 @@ module Adjoint.Core.Contexts
   where
   open import Adjoint.Core.Props Atom Mode
 
-  open import CARVe.Context Prop Mode _∙_⇒_
+  open import CARVe.Context Prop Mode _∙_⇒_ public
 
   variable
     n : ℕ

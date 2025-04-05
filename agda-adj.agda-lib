@@ -1,4 +1,4 @@
 name: agda-adj
-include: src carve-agda/src
+include: src test carve-agda/src
 depend: standard-library-2.1
 flags:
