@@ -1,5 +1,6 @@
 open import Data.Product renaming (_,_ to ⟨_,_⟩)
 open import Data.Vec
+open import Data.Nat
 
 module Adjoint.Core.Rules 
   (Atom : Set)
@@ -20,6 +21,13 @@ module Adjoint.Core.Rules
     mHarmless 
     _∙_⇒_ 
     _≥_ 
+
+  private
+    variable
+      n : ℕ
+      Δ Δ' Δ₁ Δ₂ Δ₃ Δ₁₂ Δ₂₃ Δ₁₂' Δ₂₃' : Context n
+      m k l : Mode
+      A B C : Prop 
   
   data _⊢_ : Context n → ModedProp → Set where
 
