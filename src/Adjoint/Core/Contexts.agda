@@ -20,7 +20,7 @@ module Adjoint.Core.Contexts
   open import CARVe.Context Prop Mode _∙_⇒_ public
   private 
     variable
-      n : ℕ
+      n q : ℕ
       Δ Δ' Δ'' Δ''' Δ₁ Δ₂ Δ₃ Δ₂' Δ₁₂ Δ₂₃ Δ₁₂' Δ₂₃'  : Context n
       A B C : Prop 
       m k l m₁ m₂ : Mode
@@ -47,9 +47,7 @@ module Adjoint.Core.Contexts
 
   -- We allow optional "consumption" by optionally marking a proposition as
   -- irrelevant
-  data mayConsume : Context n → Prop × Mode → Context n → Set where
-    consume/yes : update Δ ⟨ A , m ⟩ ⟨ A , k ⟩ Δ' → mHarmless k
-      → mayConsume Δ ⟨ A , m ⟩ Δ'
+  data mayConsume : Context n → Prop × Mode → Context q → Set where
+    consume/yes : mayConsume (⟨ A , m ⟩ ∷ Δ) ⟨ A , m ⟩  Δ
 
-    consume/no : update Δ ⟨ A , m ⟩ ⟨ A , m ⟩ Δ → mContractable m
-      → mayConsume Δ ⟨ A , m ⟩ Δ
+    consume/no : mayConsume Δ ⟨ A , m ⟩ Δ
