@@ -20,6 +20,7 @@ module Adjoint.Core.Props
     _⊕_ : Prop → Prop → Prop
     -- With - Using the binary version rather than the n-ary version for simplicity
     _&_ : Prop → Prop → Prop
+    -- Shifts: left is down, right is up
     -- Upshift
     ↑[_][_]_ : Mode → Mode → Prop → Prop
     -- Downshift

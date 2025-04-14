@@ -21,7 +21,7 @@ module Adjoint.Core.Contexts
   private 
     variable
       n q : ℕ
-      Δ Δ' Δ'' Δ''' Δ₁ Δ₂ Δ₃ Δ₂' Δ₁₂ Δ₂₃ Δ₁₂' Δ₂₃'  : Context n
+      Δ Δ' Δ'' Δ''' Δ₁ Δ₂ Δ₃ Δ₄ Δ₅ Δ₆ Δ₂' Δ₁₂ Δ₂₃ Δ₁₂' Δ₂₃'  : Context n
       A B C : Prop 
       m k l m₁ m₂ : Mode
 
@@ -51,3 +51,21 @@ module Adjoint.Core.Contexts
     consume/yes : mayConsume (⟨ A , m ⟩ ∷ Δ) ⟨ A , m ⟩  Δ
 
     consume/no : mayConsume Δ ⟨ A , m ⟩ Δ
+
+
+  {- Properties of concatenated contexts -}
+
+  -- If we can merge two pairs of contexts, the concatenation of those pairs is also
+  -- mergeable.
+  merge-concat : merge Δ₁ Δ₂ Δ₃ → merge Δ₄ Δ₅ Δ₆ → merge (Δ₁ ++ Δ₄) (Δ₂ ++ Δ₅) (Δ₃ ++ Δ₆)
+  merge-concat merge/z merge/z = merge/z
+  merge-concat merge/z (merge/s M2 x) = merge/s M2 x
+  merge-concat (merge/s M1 x) merge/z = merge/s (merge-concat M1 merge/z) x
+  merge-concat (merge/s M1 x) (merge/s M2 x₁) = merge/s (merge-concat M1 (merge/s M2 x₁)) x 
+
+  {- Properties of the ≥ᶜ -}
+  ≥ᶜ-concat : Δ₁ ≥ᶜ m → Δ₂ ≥ᶜ m → (Δ₁ ++ Δ₂) ≥ᶜ m
+  ≥ᶜ-concat ≥/z ≥/z = ≥/z
+  ≥ᶜ-concat ≥/z (≥/s in2 x) = ≥/s in2 x
+  ≥ᶜ-concat (≥/s in1 x) ≥/z = ≥/s (≥ᶜ-concat in1 ≥/z) x
+  ≥ᶜ-concat (≥/s in1 x) (≥/s in2 x₁) = ≥/s (≥ᶜ-concat in1 (≥/s in2 x₁)) x
