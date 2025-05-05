@@ -17,7 +17,8 @@ module Logic.Core.Contexts (Atom : Set) (TermAtom : Set) where
   private
     variable
       s n x y z : ℕ
-      ts : Vec (Term s) n
+      ts ts₁ ts₂ : Vec (Term s) n
+      ps ps₁ ps₂ : Vec (Prop × Mode) x
       t t₁ t₂ : Term s
       Δ Δ' Δ'' Δ₁ Δ₂ Δ₃ Δ₂' Δ₁₂ Δ₂₃ Δ₁₂' Δ₂₃'  : Context x y
       m m₁ m₂ m₃ k l : Mode
@@ -29,6 +30,18 @@ module Logic.Core.Contexts (Atom : Set) (TermAtom : Set) where
   data cContractable : Context x y → Set where
     cont/n : cContractable ⟨ ts , [] ⟩
     cont/c : cContractable Δ → mContractable m → cContractable ⟨ proj₁ Δ , (⟨ A , m ⟩ ∷ proj₂ Δ) ⟩
+
+  data cUnrestricted : Context x y → Set where
+    unr/n : cUnrestricted ⟨ ts , [] ⟩
+    unr/c : cUnrestricted Δ → cUnrestricted ⟨ proj₁ Δ , ⟨ A , Unrestricted ⟩ ∷ proj₂ Δ ⟩
+
+  data cLinear : Context x y → Set where
+    lin/n : cLinear ⟨ ts , [] ⟩
+    lin/c : cLinear Δ → cLinear ⟨ proj₁ Δ , ⟨ A , Linear ⟩ ∷ proj₂ Δ ⟩
+
+  data cIrrelevant : Context x y → Set where
+    irr/n : cIrrelevant ⟨ ts , [] ⟩
+    irr/c : cIrrelevant Δ → cIrrelevant ⟨ proj₁ Δ , (⟨ A , Irrelevant ⟩ ∷ proj₂ Δ) ⟩
 
   data exh : Context x y → Set where
     exh/n : exh ⟨ ts , [] ⟩
@@ -67,6 +80,11 @@ module Logic.Core.Contexts (Atom : Set) (TermAtom : Set) where
       → isTerm Δ t
       → areTerms Δ (t ∷ ts)
 
+  data Comparable : Context x y → Context x y → Set where
+    comp/z : Comparable ⟨ ts , [] ⟩ ⟨ ts , [] ⟩
+    comp/s : Comparable ⟨ ts , ps₁ ⟩ ⟨ ts , ps₂ ⟩
+      → Comparable ⟨ ts , ⟨ A , m ⟩ ∷ ps₁ ⟩ ⟨ ts , ⟨ A , k ⟩ ∷ ps₂ ⟩
+
   ----------------------------------------------------------
   -- Properties of context predicates
   ----------------------------------------------------------
@@ -103,12 +121,6 @@ module Logic.Core.Contexts (Atom : Set) (TermAtom : Set) where
     with merge/assoc M3 M4 ← merge-assoc D1 D2
        | ∙/assoc T3 T4 ← ∙-assoc T1 T2 = merge/assoc (mg/c M3 T3) (mg/c M4 T4)
 
-  merge-cancl : merge Δ₁ Δ₂ Δ → merge Δ₁ Δ₂' Δ → Δ₂ ≡ Δ₂'
-  merge-cancl mg/n mg/n = refl
-  merge-cancl (mg/c M1 T1) (mg/c M2 T2)
-    with refl ← merge-cancl M1 M2 
-       | refl ← •-cancl T1 T2 = refl
-
   data mergeGetId : Context x y → Set where
     merge/getid : merge Δ Δ' Δ → exh Δ' → mergeGetId Δ
 
@@ -143,6 +155,51 @@ module Logic.Core.Contexts (Atom : Set) (TermAtom : Set) where
   cWeaken-shrink (weak/c cW x) = cW 
 
   ----------------------------------------------------------
+  -- Properties of irrelevancy
+  ----------------------------------------------------------
+  cIrrelevant-to-cWeaken : ∀ { Δ : Context x y } → cIrrelevant Δ → cWeakenable Δ
+  cIrrelevant-to-cWeaken irr/n = weak/n
+  cIrrelevant-to-cWeaken (irr/c irr) = weak/c (cIrrelevant-to-cWeaken irr) mweak/i
+
+  -- A fully irrelevant context can merge with itself
+  cIrrelevant-merge : ∀ { Δ : Context x y } → cIrrelevant Δ → merge Δ Δ Δ
+  cIrrelevant-merge irr/n = mg/n
+  cIrrelevant-merge (irr/c irr) = mg/c (cIrrelevant-merge irr) i∙i
+
+  ----------------------------------------------------------
+  -- Properties of unrestrictedness
+  ----------------------------------------------------------
+  cUnrestricted-to-cWeaken : ∀ { Δ : Context x y } → cUnrestricted Δ → cWeakenable Δ
+  cUnrestricted-to-cWeaken unr/n = weak/n
+  cUnrestricted-to-cWeaken (unr/c unr) = weak/c (cUnrestricted-to-cWeaken unr) mweak/u
+
+  cUnrestricted-to-cContract : ∀ { Δ : Context x y } → cUnrestricted Δ → cContractable Δ
+  cUnrestricted-to-cContract unr/n = cont/n
+  cUnrestricted-to-cContract (unr/c unr) = cont/c (cUnrestricted-to-cContract unr) mcontract/u
+  
+  -- A fully unrestricted context can merge with itself
+  cUnrestricted-merge-id : ∀ { Δ : Context x y }
+    → cUnrestricted Δ
+    → merge Δ Δ Δ
+  cUnrestricted-merge-id unr/n = mg/n
+  cUnrestricted-merge-id (unr/c unr) = mg/c (cUnrestricted-merge-id unr) u∙u
+
+  {-
+    Properties of the Comparable relation
+  -}
+  comparable-id : Comparable Δ Δ
+  comparable-id {Δ = ⟨ fst , [] ⟩} = comp/z
+  comparable-id {Δ = ⟨ fst , ⟨ fst₁ , snd₁ ⟩ ∷ snd ⟩} = comp/s comparable-id
+
+  comparable-trans : Comparable Δ₁ Δ₂ → Comparable Δ₂ Δ₃ → Comparable Δ₁ Δ₃
+  comparable-trans comp/z comp/z = comp/z
+  comparable-trans (comp/s comp1) (comp/s comp2) = comp/s (comparable-trans comp1 comp2)
+
+  comparable-comm : Comparable Δ₁ Δ₂ → Comparable Δ₂ Δ₁
+  comparable-comm comp/z = comp/z
+  comparable-comm (comp/s comp) = comp/s (comparable-comm comp)
+
+  ----------------------------------------------------------
   -- Properties of concatenation
   ----------------------------------------------------------
   concat-cWeak : ∀ { Δ } → Δ ≡ Δ₁ ++ᶜ Δ₂ → cWeakenable Δ₁ → cWeakenable Δ₂ → cWeakenable Δ
@@ -162,3 +219,10 @@ module Logic.Core.Contexts (Atom : Set) (TermAtom : Set) where
   concat-merge {x = zero} {z = suc z} mg/n (mg/c M2 x) = mg/c (concat-merge mg/n M2) x 
   concat-merge {x = suc x} {z = zero} (mg/c M1 x₁) mg/n = mg/c (concat-merge M1 mg/n) x₁ 
   concat-merge {x = suc x} {z = suc z} (mg/c M1 x₁) (mg/c M2 x₂) = mg/c (concat-merge M1 (mg/c M2 x₂)) x₁
+
+  concat-update-r : ∀ { w x y z A m B k } { Δ₁ Δ₁' : Context w x } { Δ₂ : Context y z } 
+    → update Δ₁ ⟨ A , m ⟩ ⟨ B , k ⟩ Δ₁'
+    → update (Δ₂ ++ᶜ Δ₁) ⟨ A , m ⟩ ⟨ B , k ⟩ (Δ₂ ++ᶜ Δ₁')
+  concat-update-r {z = zero} {Δ₂ = ⟨ fst , [] ⟩} N = N
+  concat-update-r {z = zero} {Δ₂ = ⟨ fst , [] ⟩} (S U) = S (concat-update-r U)
+  concat-update-r {z = suc z} {Δ₂ = ⟨ fst , x ∷ snd ⟩} U = S (concat-update-r { Δ₂ = ⟨ fst , snd ⟩ } U) 

@@ -37,6 +37,7 @@ module Logic.Core.Modes where
     i∙i : Irrelevant ∙ Irrelevant ⇒ Irrelevant
     i∙l : Irrelevant ∙ Linear ⇒ Linear
     l∙i : Linear ∙ Irrelevant ⇒ Linear
+    l∙l : Linear ∙ Linear ⇒ Linear
 
   ----------------------------------------------------------
   -- ≥ is a preorder
@@ -65,16 +66,18 @@ module Logic.Core.Modes where
   ∙-comm i∙i = i∙i
   ∙-comm i∙l = l∙i
   ∙-comm l∙i = i∙l
+  ∙-comm l∙l = l∙l
 
   ∙-func : m₁ ∙ m₂ ⇒ m → m₁ ∙ m₂ ⇒ m' → m ≡ m'
   ∙-func u∙u u∙u = refl
   ∙-func i∙i i∙i = refl
   ∙-func i∙l i∙l = refl
   ∙-func l∙i l∙i = refl
+  ∙-func l∙l l∙l = refl
 
-  ∙-irrel-is-id : m₁ ∙ Irrelevant ⇒ m₂ → m₁ ≡ m₂
-  ∙-irrel-is-id i∙i = refl
-  ∙-irrel-is-id l∙i = refl
+  ∙-irrel-is-right-id : m₁ ∙ Irrelevant ⇒ m₂ → m₁ ≡ m₂
+  ∙-irrel-is-right-id i∙i = refl
+  ∙-irrel-is-right-id l∙i = refl
 
   data ∙GetId : Mode → Set where
     ∙/getid : m ∙ m' ⇒ m → harmless m' → ∙GetId m
@@ -94,12 +97,11 @@ module Logic.Core.Modes where
   ∙-assoc i∙i i∙l = ∙/assoc i∙l i∙l
   ∙-assoc i∙l l∙i = ∙/assoc i∙l l∙i
   ∙-assoc l∙i l∙i = ∙/assoc l∙i i∙i
+  ∙-assoc i∙l l∙l = ∙/assoc i∙l l∙l
+  ∙-assoc l∙i l∙l = ∙/assoc l∙l i∙l
+  ∙-assoc l∙l l∙i = ∙/assoc l∙l l∙i
+  ∙-assoc l∙l l∙l = ∙/assoc l∙l l∙l
 
-  •-cancl : m₁ ∙ m₂ ⇒ m → m₁ ∙ m₂' ⇒ m → m₂ ≡ m₂'
-  •-cancl u∙u u∙u = refl
-  •-cancl i∙i i∙i = refl
-  •-cancl i∙l i∙l = refl
-  •-cancl l∙i l∙i = refl
 
   ----------------------------------------------------------
   -- Properties of mode predicates
