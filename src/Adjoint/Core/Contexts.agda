@@ -48,9 +48,13 @@ module Adjoint.Core.Contexts
   -- We allow optional "consumption" by optionally marking a proposition as
   -- irrelevant
   data mayConsume : Context n → Prop × Mode → Context q → Set where
-    consume/yes : mayConsume (⟨ A , m ⟩ ∷ Δ) ⟨ A , m ⟩  Δ
+    consume/yes :
+      update Δ ⟨ A , m ⟩ ⟨ A , k ⟩ Δ' → mHarmless k 
+      → mayConsume Δ ⟨ A , m ⟩  Δ
 
-    consume/no : mayConsume Δ ⟨ A , m ⟩ Δ
+    consume/no : 
+      update Δ ⟨ A , m ⟩ ⟨ A , m ⟩ Δ
+      → mayConsume Δ ⟨ A , m ⟩ Δ
 
 
   {- Properties of concatenated contexts -}
@@ -62,6 +66,11 @@ module Adjoint.Core.Contexts
   merge-concat merge/z (merge/s M2 x) = merge/s M2 x
   merge-concat (merge/s M1 x) merge/z = merge/s (merge-concat M1 merge/z) x
   merge-concat (merge/s M1 x) (merge/s M2 x₁) = merge/s (merge-concat M1 (merge/s M2 x₁)) x 
+
+  weak-concat : cWeakenable Δ₁ → cWeakenable Δ₂ → cWeakenable (Δ₁ ++ Δ₂)
+  weak-concat weak/z weak/z = weak/z
+  weak-concat weak/z (weak/s Δ₂-weak x) = weak/s Δ₂-weak x
+  weak-concat (weak/s Δ₁-weak x) Δ₂-weak = weak/s (weak-concat Δ₁-weak Δ₂-weak) x
 
   {- Properties of the ≥ᶜ -}
   ≥ᶜ-concat : Δ₁ ≥ᶜ m → Δ₂ ≥ᶜ m → (Δ₁ ++ Δ₂) ≥ᶜ m
