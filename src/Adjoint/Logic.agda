@@ -12,7 +12,7 @@ module Adjoint.Logic
   where
 
   {- Repackage all the parts -}
-  open import Adjoint.Core.Props Atom Mode public
+  open import Adjoint.Core.Props Atom Mode _≥_ public
   open import Adjoint.Core.Contexts 
     Atom 
     Mode  
