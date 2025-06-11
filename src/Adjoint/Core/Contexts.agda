@@ -50,7 +50,7 @@ module Adjoint.Core.Contexts
   data mayConsume : Context n → Prop × Mode → Context q → Set where
     consume/yes :
       update Δ ⟨ A , m ⟩ ⟨ A , k ⟩ Δ' → mHarmless k 
-      → mayConsume Δ ⟨ A , m ⟩  Δ
+      → mayConsume Δ ⟨ A , m ⟩ Δ'
 
     consume/no : 
       update Δ ⟨ A , m ⟩ ⟨ A , m ⟩ Δ
