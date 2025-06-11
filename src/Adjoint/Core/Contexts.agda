@@ -48,9 +48,14 @@ module Adjoint.Core.Contexts
   -- We allow optional "consumption" by optionally marking a proposition as
   -- irrelevant
   data mayConsume : Context n → Prop × Mode → Context q → Set where
-    consume/yes : mayConsume (⟨ A , m ⟩ ∷ Δ) ⟨ A , m ⟩  Δ
+    consume/yes :
+      update Δ ⟨ A , m ⟩ ⟨ A , k ⟩ Δ' → mHarmless k 
+      → mayConsume Δ ⟨ A , m ⟩ Δ'
 
-    consume/no : mayConsume Δ ⟨ A , m ⟩ Δ
+    consume/no : 
+      update Δ ⟨ A , m ⟩ ⟨ A , m ⟩ Δ
+      → mayConsume Δ ⟨ A , m ⟩ Δ
+
 
 
   {- Properties of concatenated contexts -}
