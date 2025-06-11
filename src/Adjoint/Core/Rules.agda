@@ -12,7 +12,7 @@ module Adjoint.Core.Rules
   (_≥_ : Mode → Mode → Set) 
   where
   
-  open import Adjoint.Core.Props Atom Mode
+  open import Adjoint.Core.Props Atom Mode _≥_
   open import Adjoint.Core.Contexts 
     Atom 
     Mode  
@@ -42,7 +42,7 @@ module Adjoint.Core.Rules
     ⊕R₂ : Δ ⊢ ⟨ B , m ⟩
       ----------------------------------------------------------
       → Δ ⊢ ⟨ A ⊕ B , m ⟩
-
+    
     ⊕L : mayConsume Δ ⟨ A ⊕ B , m ⟩ Δ'
       →  (⟨ A , m ⟩ ∷ Δ') ⊢ ⟨ C , k ⟩ → (⟨ B , m ⟩ ∷ Δ') ⊢ ⟨ C , k ⟩
       ----------------------------------------------------------
@@ -97,21 +97,29 @@ module Adjoint.Core.Rules
     ↓R : merge Δ₁ Δ₂ Δ
       → Δ₁ ≥ᶜ m 
       → cWeakenable Δ₂
+      → (m≥k : m ≥ k)
       → Δ₁ ⊢ ⟨ A , m ⟩
       ----------------------------------------------------------
-      → Δ ⊢ ⟨ ↓[ k ][ m ] A , k ⟩
+      → Δ ⊢ ⟨ ↓[ m≥k ] A , k ⟩
 
-    ↓L : mayConsume Δ ⟨ ↓[ k ][ m ] A , k ⟩ Δ'
+    ↓L :
+      (m≥k : m ≥ k) 
+      → mayConsume Δ ⟨ ↓[ m≥k ] A , k ⟩ Δ'
       → (⟨ A , m ⟩ ∷ Δ') ⊢ ⟨ C , l ⟩
       ----------------------------------------------------------
       → Δ ⊢ ⟨ C , l ⟩
 
-    ↑R : Δ ⊢ ⟨ A , m ⟩
+    ↑R :
+      ( m≥k : m ≥ k ) 
+      → Δ ⊢ ⟨ A , k ⟩
       ----------------------------------------------------------
-      → Δ ⊢ ⟨ ↑[ k ][ m ] A , k ⟩
+      → Δ ⊢ ⟨ ↑[ m≥k ] A , m ⟩
 
-    ↑L : mayConsume Δ ⟨ ↑[ k ][ m ] A , k ⟩ Δ' → k ≥ l
-      → (⟨ A , m ⟩ ∷ Δ') ⊢ ⟨ C , l ⟩
+    ↑L :
+      ( m≥k : m ≥ k ) 
+      → mayConsume Δ ⟨ ↑[ m≥k ] A , m ⟩ Δ' 
+      → k ≥ l
+      → (⟨ A , k ⟩ ∷ Δ') ⊢ ⟨ C , l ⟩
       ----------------------------------------------------------
       → Δ ⊢ ⟨ C , l ⟩
  

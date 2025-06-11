@@ -15,7 +15,7 @@ module Adjoint.Core.Contexts
   (_∙_⇒_ : Mode → Mode → Mode → Set)
   (_≥_ : Mode → Mode → Set)
   where
-  open import Adjoint.Core.Props Atom Mode
+  open import Adjoint.Core.Props Atom Mode _≥_
 
   open import CARVe.Context Prop Mode _∙_⇒_ public
   private 
